@@ -1,0 +1,25 @@
+VyOS Router HA Setup:
+
+This step establishes the network gateway for the entire 192.168.200.0/24 subnet and provides high availability.
+
+Create Two VyOS VMs: k8s-vyos-01 and k8s-vyos-02.
+
+Network Adapters:
+
+Add two network adapters to each VyOS VM.
+
+eth0 (WAN): Connect to a bridged or NAT network in VMware (e.g., VMnet0 or VMnet8) to get internet access via DHCP.
+
+eth1 (LAN): Connect to the custom VMnet2 (192.168.200.0/24).
+
+VyOS Configuration (Master - k8s-vyos-01):
+
+configure
+set interfaces ethernet eth0 address dhcp
+set interfaces ethernet eth1 address 192.168.200.2/24
+set high-availability vrrp group 10 vrid 10
+set high-availability vrrp group 10 interface eth1
+set high-availability vrrp group 10 address 192.168.200.4/24
+set high-availability vrrp group 10 priority 110
+commit
+save
