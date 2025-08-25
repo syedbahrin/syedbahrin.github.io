@@ -17,7 +17,7 @@ sudo grubby --update-kernel ALL --args selinux=0
 sudo systemctl stop firewalld && sudo systemctl disable firewalld
 
 # Set ip and gateway
-sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.10/24 ipv4.gateway 192.168.200.4 ipv4.method manualsudo nmcli connection up ens160
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.10/24 ipv4.gateway 192.168.200.4 ipv4.method manual
 sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
 sudo nmcli connection down ens160
 sudo nmcli connection up ens160
