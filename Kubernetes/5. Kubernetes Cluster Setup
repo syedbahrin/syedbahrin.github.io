@@ -1,5 +1,17 @@
 ############################################################################
-# Disable Selinux and firewall:
+# Create a Rocky Linux 9.6 VM: 
+# Network Configuration:
+# k8s-cp-01.k8s.com: IP 192.168.200.20, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-cp-02.k8s.com: IP 192.168.200.21, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-cp-03.k8s.com: IP 192.168.200.22, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+############################################################################
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.20/24 ipv4.gateway 192.168.200.4 ipv4.method manual
+sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
+sudo nmcli connection down ens160
+sudo nmcli connection up ens160
+
+############################################################################
+# Disable Selinux and firewall, then reboot the VM:
 ############################################################################
 sudo grubby --update-kernel ALL --args selinux=0
 sudo systemctl stop firewalld && sudo systemctl disable firewalld
