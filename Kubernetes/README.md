@@ -1,6 +1,6 @@
 Homelab - Kubernetes:
 
-step-by-step guide for setting up a highly available Kubernetes cluster on VMware Workstation 17.6 using Rocky Linux 9.6, with HAProxy, Keepalived, VyOS, BIND, and Cilium.
+Step by step guide for setting up a highly available Kubernetes cluster on VMware Workstation 17.6.4 using Rocky Linux 9.6, with HAProxy, Keepalived, VyOS, BIND, and Cilium.
 
 System Overview
 
