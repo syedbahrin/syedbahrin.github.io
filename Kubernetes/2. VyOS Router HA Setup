@@ -1,21 +1,17 @@
-VyOS Router HA Setup:
-
+############################################################################
+# VyOS Router HA Setup:
+############################################################################
 This step establishes the network gateway for the entire 192.168.200.0/24 subnet and provides high availability.
-
 Create Two VyOS VMs: k8s-vyos-01 and k8s-vyos-02.
 
 Network Adapters:
-
 Add two network adapters to each VyOS VM.
-
 eth0 (WAN): Connect to a bridged or NAT network in VMware (VMnet0) to get internet access via DHCP.
-
 eth1 (LAN): Connect to the custom VMnet10 (192.168.200.0/24).
 
 ############################################################################
 # k8s-vyos-01 (Master node)
 ############################################################################
-
 VyOS Configuration (Master - k8s-vyos-01):
 
 configure
@@ -31,7 +27,6 @@ save
 ############################################################################
 # k8s-vyos-02 (Backup node)
 ############################################################################
-
 VyOS Configuration (Backup - k8s-vyos-02):
 
 configure
@@ -52,5 +47,4 @@ On both VyOS VMs,
 run show vrrp
 
 You should see k8s-vyos-01 in the MASTER state and k8s-vyos-02 in the BACKUP state. 
-
 The VIP 192.168.200.4 should be active on the master.
