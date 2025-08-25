@@ -21,6 +21,7 @@ sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.10/24 ipv4.gatewa
 sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
 sudo nmcli connection down ens160
 sudo nmcli connection up ens160
+ip addr show ens160
 
 # Update OS and install VMware Tools
 sudo dnf update -y
