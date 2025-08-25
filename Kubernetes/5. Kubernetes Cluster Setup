@@ -1,8 +1,25 @@
 ############################################################################
-# Kubernetes Cluster Setup
+# Disable Selinux and firewall:
 ############################################################################
-Configure sysctl for Kubernetes networking:
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
 
+############################################################################
+# Update OS and install VMware Tools:
+############################################################################
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+
+############################################################################
+# Disable swap:
+############################################################################
+swapoff -a
+sudo sed -i '/\/dev\mapper\/rl-swap/s/^/#/' /etc/fstab
+
+############################################################################
+# Configure sysctl for Kubernetes networking:
+############################################################################
 sudo tee /etc/modules-load.d/k8s.conf <<EOF
 overlay
 br_netfilter
@@ -33,7 +50,6 @@ sudo systemctl enable --now containerd
 ############################################################################
 # Add Kubernetes repo:
 ############################################################################
-
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -46,7 +62,6 @@ EOF
 ############################################################################
 # Install kubeadm, kubelet, kubectl:
 ############################################################################
-
 sudo dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 
