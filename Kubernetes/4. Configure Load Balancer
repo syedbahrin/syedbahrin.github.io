@@ -1,4 +1,6 @@
-Create a Rocky Linux 9.6 VM: k8s-lb-01.k8s.com and k8s-lb-02.k8s.com
+############################################################################
+# Create a Rocky Linux 9.6 VM: k8s-lb-01.k8s.com and k8s-lb-02.k8s.com
+############################################################################
 Network Configuration:
 # k8s-lb-01.k8s.com: 
 # Set a static IP: 192.168.200.10
