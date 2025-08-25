@@ -8,9 +8,9 @@ Network Adapters:
 
 Add two network adapters to each VyOS VM.
 
-eth0 (WAN): Connect to a bridged or NAT network in VMware (e.g., VMnet0 or VMnet8) to get internet access via DHCP.
+eth0 (WAN): Connect to a bridged or NAT network in VMware (VMnet0) to get internet access via DHCP.
 
-eth1 (LAN): Connect to the custom VMnet2 (192.168.200.0/24).
+eth1 (LAN): Connect to the custom VMnet10 (192.168.200.0/24).
 
 ############################################################################
 # k8s-vyos-01 (Master node)
@@ -37,7 +37,7 @@ VyOS Configuration (Backup - k8s-vyos-02):
 configure
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth1 address 192.168.200.3/24
-set high-availability vrrp group 10 vrid 51
+set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 interface eth1
 set high-availability vrrp group 10 address 192.168.200.4/24
 set high-availability vrrp group 10 priority 100
