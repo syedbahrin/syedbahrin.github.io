@@ -12,7 +12,7 @@ Network Configuration:
 # Gateway: 192.168.200.4 (VyOS VIP)
 # DNS: 192.168.200.6, 8.8.8.8
 
-# Disable Selinux and firewall
+# Disable Selinux and firewall, the reboot the VM
 sudo grubby --update-kernel ALL --args selinux=0
 sudo systemctl stop firewalld && sudo systemctl disable firewalld
 
