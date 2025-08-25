@@ -3,15 +3,27 @@
 ############################################################################
 Create a Rocky Linux 9.6 VM: k8s-dns.k8s.com.
 Network Configuration:
+# Set a static IP: 192.168.200.6.
+# Gateway: 192.168.200.4 (VyOS VIP).
 
-Set a static IP: 192.168.200.6.
-Gateway: 192.168.200.4 (VyOS VIP).
+# Disable Selinux and firewall
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
 
-Install BIND:
+# Set ip and gateway
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.3/24 ipv4.gateway 192.168.200.4 ipv4.method manual
+sudo nmcli connection up ens160
+ip addr show ens160
+
+# Update OS and install VMware Tools
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+nmcli device show ens160
+
+# Install BIND
 sudo dnf install bind bind-utils -y
 sudo systemctl enable --now named
-sudo firewall-cmd --add-service=dns --permanent
-sudo firewall-cmd --reload
 
 ############################################################################
 # Configure BIND:
