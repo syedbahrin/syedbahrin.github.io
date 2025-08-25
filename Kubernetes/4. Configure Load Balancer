@@ -1,7 +1,33 @@
+Create a Rocky Linux 9.6 VM: k8s-lb-01.k8s.com and k8s-lb-02.k8s.com
+Network Configuration:
+# k8s-lb-01.k8s.com: 
+# Set a static IP: 192.168.200.10
+# Gateway: 192.168.200.4 (VyOS VIP)
+# DNS: 192.168.200.6, 8.8.8.8
+
+# k8s-lb-02.k8s.com: 
+# Set a static IP: 192.168.200.11
+# Gateway: 192.168.200.4 (VyOS VIP)
+# DNS: 192.168.200.6, 8.8.8.8
+
+# Disable Selinux and firewall
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
+
+# Set ip and gateway
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.10/24 ipv4.gateway 192.168.200.4 ipv4.method manualsudo nmcli connection up ens160
+sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
+sudo nmcli connection down ens160
+sudo nmcli connection up ens160
+
+# Update OS and install VMware Tools
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+
 ############################################################################
 # Install HAProxy and Keepalived on Both VMs:
 ############################################################################
-
 sudo dnf install haproxy keepalived -y
 
 ############################################################################
@@ -49,9 +75,9 @@ backend kubernetes-control-planes
     server k8s-cp-03 192.168.200.22:6443 check
 
 ############################################################################
+# Keepalived Configuration:
 # k8s-lb-01
 ############################################################################
-Keepalived Configuration:
 Master (/etc/keepalived/keepalived.conf on k8s-lb-01):
 
 vrrp_script chk_haproxy {
@@ -110,7 +136,6 @@ vrrp_instance VI_1 {
 ############################################################################
 # Enable and Start Services on both LB VMs
 ############################################################################
-
 sudo systemctl enable --now haproxy keepalived
 sudo systemctl status haproxy 
 sudo systemctl status keepalived
