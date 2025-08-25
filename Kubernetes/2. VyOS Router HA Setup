@@ -1,5 +1,5 @@
 ############################################################################
-# VyOS Router HA Setup:
+# VyOS (1.5-2025-Q2) Router HA Setup:
 ############################################################################
 This step establishes the network gateway for the entire 192.168.200.0/24 subnet and provides high availability.
 Create Two VyOS VMs: k8s-vyos-01 and k8s-vyos-02.
