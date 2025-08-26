@@ -15,12 +15,17 @@ eth1 (LAN): Connect to the custom VMnet10 (192.168.200.0/24).
 VyOS Configuration (Master - k8s-vyos-01):
 
 configure
+set system host-name k8s-vyos-01
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth1 address 192.168.200.2/24
-set high-availability vrrp group 10 vrid 10
+set nat source rule 10 outbound-interface 'eth0'
+set nat source rule 10 source address '192.168.200.0/24'
+set nat source rule 10 translation address 'masquerade'
 set high-availability vrrp group 10 interface eth1
+set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 address 192.168.200.4/24
 set high-availability vrrp group 10 priority 110
+set service ssh port 22
 commit
 save
 
@@ -30,12 +35,19 @@ save
 VyOS Configuration (Backup - k8s-vyos-02):
 
 configure
+set system host-name k8s-vyos-02
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth1 address 192.168.200.3/24
-set high-availability vrrp group 10 vrid 10
+set nat source rule 10 outbound-interface 'eth0'
+set nat source rule 10 source address '192.168.200.0/24'
+set nat source rule 10 translation address 'masquerade'
 set high-availability vrrp group 10 interface eth1
+set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 address 192.168.200.4/24
 set high-availability vrrp group 10 priority 100
+set high-availability vrrp group 10 no-preempt
+
+set service ssh port 22
 commit
 save
 
