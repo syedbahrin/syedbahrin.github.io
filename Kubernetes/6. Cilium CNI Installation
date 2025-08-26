@@ -1,1 +1,40 @@
+############################################################################
+# Download Cilium CLI binary and checksum file
+############################################################################
+curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz{,.sha256sum}
 
+############################################################################
+# Verify the SHA256 checksum
+############################################################################
+sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
+
+############################################################################
+# Extract the CLI binary
+############################################################################
+tar xzvf cilium-linux-amd64.tar.gz
+
+############################################################################
+# Move the binary to /usr/local/bin and rename to 'cilium'
+############################################################################
+sudo mv cilium-linux-amd64 /usr/local/bin/cilium
+
+############################################################################
+# Make sure it's executable (if not already)
+############################################################################
+sudo chmod +x /usr/local/bin/cilium
+
+############################################################################
+# Check that Cilium CLI is installed correctly
+############################################################################
+cilium version
+
+############################################################################
+# Check the status of Cilium in your Kubernetes cluster
+############################################################################
+cilium status
+
+############################################################################
+# This command lists all pods running in the kube-system namespace, 
+#including the Cilium components (if installed).
+############################################################################
+kubectl get pods -n kube-system
