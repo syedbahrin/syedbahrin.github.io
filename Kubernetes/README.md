@@ -26,9 +26,13 @@ Router (VyOS) HA:
 
 VyOS routers with eth0 as WAN (DHCP) and eth1 as LAN static IP.
 
-k8s-vyos-01: eth0(bridge): dhcp, eth1(VMnet10): 192.168.200.2
+k8s-vyos-01: 
+eth0(bridge): dhcp
+eth1(VMnet10): 192.168.200.2
 
-k8s-vyos-02: eth0(bridge): dhcp, eth1(VMnet10): 192.168.200.3
+k8s-vyos-02: 
+eth0(bridge): dhcp
+eth1(VMnet10): 192.168.200.3
 
 VIP: 192.168.200.4
 
