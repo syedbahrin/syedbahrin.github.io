@@ -6,7 +6,7 @@ System Overview
 
 ############################################################################
 
-Virtualization Platform: VMware Workstation 17.6
+Virtualization Platform: VMware Workstation 17.6.4
 
 Operating System (K8s Nodes): Rocky Linux 9.6 minimal installation
 
