@@ -4,6 +4,8 @@
 # k8s-cp-01.k8s.com: IP 192.168.200.20, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
 # k8s-cp-02.k8s.com: IP 192.168.200.21, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
 # k8s-cp-03.k8s.com: IP 192.168.200.22, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-wn-01.k8s.com: IP 192.168.200.30, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-wn-02.k8s.com: IP 192.168.200.31, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
 ############################################################################
 sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.20/24 ipv4.gateway 192.168.200.4 ipv4.method manual
 sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
@@ -96,6 +98,9 @@ Run the copied kubeadm join command for the control plane nodes, e.g.:
 
 sudo kubeadm join 192.168.200.200:6443 --token <token> --discovery-token-ca-cert-hash <hash> --control-plane --certificate-key <key>
 
+############################################################################
+# Run below command on control panel only:
+############################################################################
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -107,7 +112,3 @@ Run the copied kubeadm join command for the worker nodes, e.g.:
 	
 sudo kubeadm join 192.168.200.200:6443 --token <token> --discovery-token-ca-cert-hash <hash>
 
-scp /etc/kubernetes/admin.conf sysadmin@192.168.200.XX:/home/sysadmin/
-mkdir -p $HOME/.kube
-sudo cp -i admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
