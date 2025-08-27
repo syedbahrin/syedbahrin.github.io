@@ -56,7 +56,6 @@ sudo sysctl --system
 
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install containerd.io -y
-sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo sed -i 's|sandbox_image = "registry.k8s.io/pause:3\.[0-9]*"|sandbox_image = "registry.k8s.io/pause:3.10"|' /etc/containerd/config.toml
@@ -88,22 +87,19 @@ Note: The --pod-network-cidr is crucial and must be specified based on the CNI. 
 	
 sudo kubeadm init --control-plane-endpoint "192.168.200.200:6443" --upload-certs --apiserver-advertise-address=192.168.200.20 --pod-network-cidr=10.244.0.0/16
 
+############################################################################
+# Join Worker Nodes (k8s-wn-01, k8s-wn-02):
+############################################################################
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 ############################################################################
 # Join Other Control Plane Nodes (k8s-cp-02, k8s-cp-03):
 ############################################################################
 Run the copied kubeadm join command for the control plane nodes, e.g.:
 
 sudo kubeadm join 192.168.200.200:6443 --token <token> --discovery-token-ca-cert-hash <hash> --control-plane --certificate-key <key>
-
-############################################################################
-# Run below command on control panel only:
-############################################################################
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ############################################################################
 # Join Worker Nodes (k8s-wn-01, k8s-wn-02):
