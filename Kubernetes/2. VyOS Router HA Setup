@@ -46,7 +46,6 @@ set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 address 192.168.200.4/24
 set high-availability vrrp group 10 priority 100
 set high-availability vrrp group 10 no-preempt
-
 set service ssh port 22
 commit
 save
