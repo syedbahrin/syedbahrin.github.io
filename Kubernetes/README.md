@@ -64,6 +64,6 @@ k8s-cp-03.k8s.com: 192.168.200.22
 
 Kubernetes Worker Nodes:
 
-k8s-wn-01.k8s.com: 192.168.200.30
+k8s-wn-01.k8s.com: 192.168.200.40
 
-k8s-wn-02.k8s.com: 192.168.200.31
+k8s-wn-02.k8s.com: 192.168.200.41
