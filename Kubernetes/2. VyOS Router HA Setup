@@ -55,7 +55,7 @@ save
 ############################################################################
 On both VyOS VMs, 
 
-run show vrrp
+show vrrp
 
 You should see k8s-vyos-01 in the MASTER state and k8s-vyos-02 in the BACKUP state. 
 The VIP 192.168.200.4 should be active on the master.
