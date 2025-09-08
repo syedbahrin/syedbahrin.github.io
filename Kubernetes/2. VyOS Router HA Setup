@@ -24,7 +24,9 @@ set nat source rule 10 translation address 'masquerade'
 set high-availability vrrp group 10 interface eth1
 set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 address 192.168.200.4/24
+set high-availability vrrp group 10 peer-address 192.168.200.3
 set high-availability vrrp group 10 priority 110
+set high-availability vrrp sync-group k8s-api member k8s-api
 set service ssh port 22
 commit
 save
@@ -44,6 +46,8 @@ set nat source rule 10 translation address 'masquerade'
 set high-availability vrrp group 10 interface eth1
 set high-availability vrrp group 10 vrid 10
 set high-availability vrrp group 10 address 192.168.200.4/24
+set high-availability vrrp group 10 peer-address 192.168.200.2
+set high-availability vrrp sync-group k8s-api member k8s-api
 set high-availability vrrp group 10 priority 100
 set high-availability vrrp group 10 no-preempt
 set service ssh port 22
