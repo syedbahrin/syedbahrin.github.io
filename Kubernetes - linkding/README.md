@@ -75,6 +75,9 @@ sudo k3s kubectl apply -f deploy_linkding.yaml<br><br>
 Run below command to check linkding pod<br>
 sudo k3s kubectl get pods -n linkding<br>
 
+# Create port forward
+sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090<br>
+
 # Create service for linkding
 Create a yaml file svc_linkding.yaml to deploy service<br>
 ```yaml
