@@ -5,10 +5,10 @@ OS Ubuntu 24.04.3 Minimal. <br>
 K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
 Create VM <br>
 2 VM <br>
-| Header 1 | Header 2 | Header 3 |
-|---|---|---|
-| Row 1 Col 1 | Row 1 Col 2 | Row 1 Col 3 |
-| Row 2 Col 1 | Row 2 Col 2 | Row 2 Col 3 |
+| VM Name | OS | vCPU | RAM | HD | IP |
+|---|---|---|---|---|---|
+| cp01 | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.128 |
+| wn01 | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.129 |
 
 First VM hostname - cp01 <br>
 Second VM hostname - wn01 <br>
