@@ -2,15 +2,15 @@ Setup K3s to deploy linkding. <br>
 Macbook Air M2. <br>
 VMware Fusion. <br>
 K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
-VM information:
+# VM information
 | VM Name | Node status | OS | vCPU | RAM (GB) | HD (GB) | IP |
 |---|---|---|---|---|---|---|
 | cp01 | Control plane | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.128 |
 | wn01 | Worker | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.129 |
 
-VMware Fusion main interface. <br>
+# VMware Fusion main interface
 ![Alt text](images/VMware_Fusion_Main.png) <br><br>
-VM setting. <br>
+# VM setting
 ![Alt text](images/VMware_Fusion_VM_setting.png)
 
 # Update OS
