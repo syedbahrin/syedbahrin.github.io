@@ -15,7 +15,7 @@ K3s with 2 nodes
 ![Alt text](images/VMware_Fusion_VM_setting.png)
 
 # Update OS
-sudo apt update && sudo apt upgrade -y
+sudo apt update && sudo apt upgrade -y<br>
 sudo reboot now
 
 # Configure /etc/hosts, add two hostname 
@@ -23,7 +23,7 @@ sudo reboot now
 172.16.165.129 wn01
 
 # Disable swap (required by Kubernetes)
-sudo swapoff -a
+sudo swapoff -a<br>
 sudo sed -i '/swap/d' /etc/fstab
 
 # Install k3s on Master node
@@ -89,8 +89,8 @@ spec:
       name: http
 ```
 Run below command to deploy service<br>
-sudo k3s kubectl apply -f svc_linkding.yaml<br>
-Run below command to check service
+sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
+Run below command to check service<br>
 sudo k3s kubectl get service
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com
