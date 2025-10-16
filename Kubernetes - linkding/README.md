@@ -37,7 +37,7 @@ curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=T
 
 # Create a script to deploy linkding
 # sudo k3s kubectl apply -f deploy_linkding.yaml
-
+```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -67,7 +67,7 @@ spec:
 # Create file svc_linkding.yaml
 # sudo k3s kubectl apply -f svc_linkding.yaml
 # sudo k3s kubectl get service
-
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
