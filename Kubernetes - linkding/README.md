@@ -102,5 +102,5 @@ Run below command to check service<br>
 sudo k3s kubectl get service
 
 # Setup administrator account for linkding
-sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -- python3 manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com<br>
+sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com<br>
 
