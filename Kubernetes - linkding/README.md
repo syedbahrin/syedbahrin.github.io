@@ -39,6 +39,7 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
 <br><br>Run below command on control plane node to check node status<br>
 sudo k3s kubectl get nodes
+
 # Deploy linkding
 Create a yaml file deploy_linkding.yaml deploy linkding<br>
 
@@ -74,6 +75,7 @@ sudo k3s kubectl apply -f deploy_linkding.yaml<br><br>
 
 Run below command to check linkding pod<br>
 sudo k3s kubectl get pods -n linkding<br>
+![Alt text](images/kuberctl_get_pods_n_linkding.png)
 
 # Create port forward
 sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding<br>
@@ -99,8 +101,17 @@ spec:
 Run below command to deploy service<br>
 sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
 Run below command to check service<br>
-sudo k3s kubectl get service
+sudo k3s kubectl get svc -A<br>
+![Alt text](images/kuberctl_get-svc.png)
 
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
+Enter password<br>
+![Alt text](images/create_superuser-account.png)
+
+# Access linkding page using superuser credential
+![Alt text](images/enter_superuser_credential.png)
+
+# In superuser profile page
+![Alt text](images/superuser_account.png)
 
