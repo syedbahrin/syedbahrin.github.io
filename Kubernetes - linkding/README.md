@@ -1,4 +1,4 @@
-Setup K3s to deploy linkding. <br>
+# Setup K3s to deploy linkding
 Macbook Air M2. <br>
 VMware Fusion. <br>
 K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
@@ -18,7 +18,7 @@ K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
 sudo apt update && sudo apt upgrade -y
 sudo reboot now
 
-# configure /etc/hosts
+# Configure /etc/hosts, add two hostname 
 172.16.165.128 cp01
 172.16.165.129 wn01
 
