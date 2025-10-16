@@ -19,7 +19,7 @@ ubuntu-24.04.3-live-server-arm64.iso<br>
 sudo apt update && sudo apt upgrade -y<br>
 sudo reboot now
 
-# Configure /etc/hosts, add two hostname 
+# Configure /etc/hosts on both VMs, add two hostname 
 172.16.165.128 cp01<br>
 172.16.165.129 wn01
 
@@ -27,11 +27,12 @@ sudo reboot now
 sudo swapoff -a<br>
 sudo sed -i '/swap/d' /etc/fstab
 
-# Install k3s on Master node
+# Install K3s on Master node
 curl -sfL https://get.k3s.io | sh -
 <br><br>Run below command to check node status<br>
 sudo k3s kubectl get nodes
-# Copy Token for next step
+
+# Copy token for next step
 sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Install k3s on Worker node
@@ -93,6 +94,7 @@ Run below command to deploy service<br>
 sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
 Run below command to check service<br>
 sudo k3s kubectl get service
+
 # Setup administrator account for linkding
-sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com
+sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com<br>
 
