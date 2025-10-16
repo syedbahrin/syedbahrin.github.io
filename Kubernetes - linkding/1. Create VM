@@ -6,6 +6,8 @@ vCPU : 2
 RAM  : 2GB
 HD   : 20GB
 
+![Alt text](images/VMware_Fusion_VM_setting.png)
+
 # Update OS
 sudo apt update && sudo apt upgrade -y
 sudo reboot now
