@@ -12,3 +12,15 @@ VMware Fusion main interface. <br>
 ![Alt text](images/VMware_Fusion_Main.png) <br><br>
 VM setting. <br>
 ![Alt text](images/VMware_Fusion_VM_setting.png)
+
+# Update OS
+sudo apt update && sudo apt upgrade -y
+sudo reboot now
+
+# configure /etc/hosts
+172.16.165.128 cp01
+172.16.165.129 wn01
+
+# Disable swap (required by Kubernetes)
+sudo swapoff -a
+sudo sed -i '/swap/d' /etc/fstab
