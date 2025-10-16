@@ -1,6 +1,6 @@
 # Setup K3s nodes to deploy linkding
 Macbook Air M2<br>
-VMware Fusion<br>
+VMware-Fusion-13.6.4-24832108<br>
 ubuntu-24.04.3-live-server-arm64.iso<br>
 
 # VM information
