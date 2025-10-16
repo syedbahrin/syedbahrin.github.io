@@ -103,4 +103,5 @@ sudo k3s kubectl get service
 
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
-
+Enter password<br>
+![Alt text](images/VMware_Fusion_VM_setting.png)
