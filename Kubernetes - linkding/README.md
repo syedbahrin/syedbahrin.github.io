@@ -11,12 +11,7 @@ OS   : Ubuntu 24.04.3 Minimal <br>
 vCPU : 2 <br>
 RAM  : 2GB <br>
 HD   : 20GB <br>
-<br>
-VMware Fusion
-<br>
-![Alt text](images/VMware_Fusion_Main.png)
-<br>
-<br>
-VM setting
-<br>
+VMware Fusion <br>
+![Alt text](images/VMware_Fusion_Main.png) <br>
+VM setting <br>
 ![Alt text](images/VMware_Fusion_VM_setting.png)
