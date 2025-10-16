@@ -70,7 +70,10 @@ spec:
             - containerPort: 9090 
 ```
 Run below command to deploy linkding<br>
-sudo k3s kubectl apply -f deploy_linkding.yaml
+sudo k3s kubectl apply -f deploy_linkding.yaml<br><br>
+
+Run below command to check linkding pod<br>
+sudo k3s kubectl get pods -n linkding<br>
 
 # Create service for linkding
 Create a yaml file svc_linkding.yaml to deploy service<br>
