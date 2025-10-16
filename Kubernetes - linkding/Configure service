@@ -1,0 +1,18 @@
+# Create file svc_linkding.yaml
+# sudo k3s kubectl apply -f svc_linkding.yaml
+# sudo k3s kubectl get service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: linkding-service
+  namespace: linkding
+spec:
+  type: LoadBalancer
+  selector:
+    app: linkding
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: http
