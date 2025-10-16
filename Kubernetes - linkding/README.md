@@ -9,6 +9,6 @@ VMware Fusion
 ![Alt text](images/VMware_Fusion_Main.png)
 <br>
 <br>
-VM hardware configuration
+VM setting
 <br>
 ![Alt text](images/VMware_Fusion_VM_setting.png)
