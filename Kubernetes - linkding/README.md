@@ -57,11 +57,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-    app: linkding
+      app: linkding
   template:
     metadata:
       labels:
-      app: linkding
+        app: linkding
     spec:
       containers:
         - name: linkding
