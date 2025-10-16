@@ -67,7 +67,7 @@ spec:
 # Create file svc_linkding.yaml
 # sudo k3s kubectl apply -f svc_linkding.yaml
 # sudo k3s kubectl get service
-```yaml
+
 apiVersion: v1
 kind: Service
 metadata:
