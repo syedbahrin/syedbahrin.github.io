@@ -63,11 +63,11 @@ spec:
           image: sissbruecker/linkding:1.44.1
           ports:
             - containerPort: 9090 
-
+```yaml
 # Create file svc_linkding.yaml
 # sudo k3s kubectl apply -f svc_linkding.yaml
 # sudo k3s kubectl get service
-
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -82,7 +82,7 @@ spec:
       targetPort: 9090
       protocol: TCP
       name: http
-
+```yaml
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com
 
