@@ -9,6 +9,6 @@ VM information:
 | wn01 | Worker | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.129 |
 
 VMware Fusion main interface. <br>
-![Alt text](images/VMware_Fusion_Main.png) <br>
+![Alt text](images/VMware_Fusion_Main.png) <br><br>
 VM setting. <br>
 ![Alt text](images/VMware_Fusion_VM_setting.png)
