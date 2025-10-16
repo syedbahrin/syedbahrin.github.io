@@ -1,6 +1,6 @@
 # Setup K3s to deploy linkding
-Macbook Air M2
-VMware Fusion
+Macbook Air M2<br>
+VMware Fusion<br>
 K3s with 2 nodes, 1 control plane / master node and 1 worker node
 # VM information
 | VM Name | Node status | OS | vCPU | RAM (GB) | HD (GB) | IP |
