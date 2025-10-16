@@ -28,16 +28,18 @@ sudo sed -i '/swap/d' /etc/fstab
 
 # Install k3s on Master node
 curl -sfL https://get.k3s.io | sh -
-
+Run below command to check node status<br>
+sudo k3s kubectl get nodes
 # Copy Token for next step
 sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Install k3s on Worker node
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
-
+Run below command on control plane node to check node status<br>
+sudo k3s kubectl get nodes
 # Deploy linkding
-Create a script to deploy linkding<br>
-sudo k3s kubectl apply -f deploy_linkding.yaml
+Create a yaml file deploy_linkding.yaml deploy linkding<br>
+
 ```yaml
 apiVersion: v1
 kind: Namespace
@@ -65,9 +67,11 @@ spec:
           ports:
             - containerPort: 9090 
 ```
-# Create file svc_linkding.yaml
-# sudo k3s kubectl apply -f svc_linkding.yaml
-# sudo k3s kubectl get service
+Run below command to deploy linkding<br>
+sudo k3s kubectl apply -f deploy_linkding.yaml
+
+# Create service for linkding
+Create a yaml file svc_linkding.yaml to deploy service<br>
 ```yaml
 apiVersion: v1
 kind: Service
@@ -84,6 +88,10 @@ spec:
       protocol: TCP
       name: http
 ```
+Run below command to deploy service<br>
+sudo k3s kubectl apply -f svc_linkding.yaml<br>
+Run below command to check service
+sudo k3s kubectl get service
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com
 
