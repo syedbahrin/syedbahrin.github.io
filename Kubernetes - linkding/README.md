@@ -25,3 +25,64 @@ sudo reboot now
 # Disable swap (required by Kubernetes)
 sudo swapoff -a
 sudo sed -i '/swap/d' /etc/fstab
+
+# Install k3s on Master node
+curl -sfL https://get.k3s.io | sh -
+
+# Copy Token for next step
+sudo cat /var/lib/rancher/k3s/server/node-token
+
+# Install k3s on Worker node
+curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
+
+# Create a script to deploy linkding
+# sudo k3s kubectl apply -f deploy_linkding.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: linkding
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: linkding
+   namespace: linkding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+    app: linkding
+  template:
+    metadata:
+      labels:
+      app: linkding
+    spec:
+      containers:
+        - name: linkding
+          image: sissbruecker/linkding:1.44.1
+          ports:
+            - containerPort: 9090 
+
+# Create file svc_linkding.yaml
+# sudo k3s kubectl apply -f svc_linkding.yaml
+# sudo k3s kubectl get service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: linkding-service
+  namespace: linkding
+spec:
+  type: LoadBalancer
+  selector:
+    app: linkding
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: http
+
+# Setup administrator account for linkding
+sudo k3s kubectl  exec -it linkding- — python manage.py createsuperuser —username=sysadmin --email=syedbahrin@example.com
+
