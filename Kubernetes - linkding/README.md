@@ -27,22 +27,32 @@ sudo reboot now
 172.16.165.129 wn01
 
 # Disable swap (required by Kubernetes)
-sudo swapoff -a<br>
+```cmd
+sudo swapoff -a
+```
+```cmd
 sudo sed -i '/swap/d' /etc/fstab
-
+```
 # Install K3s on Master node
+```cmd
 curl -sfL https://get.k3s.io | sh -
-<br>Run below command to check node status<br>
+```
+Run below command to check node status
+```cmd
 sudo k3s kubectl get nodes
-
+```
 # Copy token for next step
+```cmd
 sudo cat /var/lib/rancher/k3s/server/node-token
-
+```
 # Install k3s on Worker node
+```cmd
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
-<br>Run below command on control plane node to check node status<br>
+```
+Run below command on control plane node to check node status
+```cmd
 sudo k3s kubectl get nodes
-
+```
 # Deploy linkding
 Create a yaml file deploy_linkding.yaml deploy linkding<br>
 
@@ -81,8 +91,9 @@ sudo k3s kubectl get pods -n linkding<br>
 ![Alt text](images/kuberctl_get_pods_n_linkding.png)
 
 # Create port forward
+```cmd
 sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding<br>
-
+```
 # Create service for linkding
 Create a yaml file svc_linkding.yaml to deploy service<br>
 ```yaml
@@ -102,13 +113,19 @@ spec:
       name: http
 ```
 Run below command to deploy service<br>
-sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
-Run below command to check service<br>
-sudo k3s kubectl get svc -A<br>
+```cmd
+sudo k3s kubectl apply -f svc_linkding.yaml
+```
+Run below command to check service
+```cmd
+sudo k3s kubectl get svc -A
+```
 ![Alt text](images/kuberctl_get-svc.png)
 
 # Setup administrator account for linkding
+```cmd
 sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
+```
 Enter password<br>
 ![Alt text](images/create_superuser-account.png)
 
