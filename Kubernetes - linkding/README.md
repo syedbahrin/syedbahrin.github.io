@@ -19,7 +19,7 @@ sudo apt update && sudo apt upgrade -y
 sudo reboot now
 
 # Configure /etc/hosts, add two hostname 
-172.16.165.128 cp01
+172.16.165.128 cp01<br>
 172.16.165.129 wn01
 
 # Disable swap (required by Kubernetes)
@@ -28,14 +28,14 @@ sudo sed -i '/swap/d' /etc/fstab
 
 # Install k3s on Master node
 curl -sfL https://get.k3s.io | sh -
-Run below command to check node status<br>
+<br>Run below command to check node status<br>
 sudo k3s kubectl get nodes
 # Copy Token for next step
 sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Install k3s on Worker node
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
-Run below command on control plane node to check node status<br>
+<br>Run below command on control plane node to check node status<br>
 sudo k3s kubectl get nodes
 # Deploy linkding
 Create a yaml file deploy_linkding.yaml deploy linkding<br>
