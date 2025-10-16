@@ -7,8 +7,7 @@ K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
 1. Create VM <br>
    2 VM <br>
    First VM hostname - cp01 <br>
-   Second VM hostname - wn01 <br> <br>
-   
+   Second VM hostname - wn01 <br> <br>   
 OS   : Ubuntu 24.04.3 Minimal <br>
 vCPU : 2 <br>
 RAM  : 2GB <br>
