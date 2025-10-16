@@ -15,12 +15,13 @@ ubuntu-24.04.3-live-server-arm64.iso<br>
 # VM setting
 ![Alt text](images/VMware_Fusion_VM_setting.png)
 
-# Update OS
-```text
-sudo apt update && sudo apt upgrade -y<br>
+# Update OS and then reboot VM
+```cmd
+sudo apt update && sudo apt upgrade -y
 ```
+```cmd
 sudo reboot now
-
+```
 # Configure /etc/hosts on both VMs, add two hostname 
 172.16.165.128 cp01<br>
 172.16.165.129 wn01
