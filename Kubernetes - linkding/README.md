@@ -3,7 +3,7 @@ Macbook Air M2. <br>
 VMware Fusion. <br>
 K3s with 2 nodes, 1 control plane / master node and 1 worker node. <br>
 VM information:
-| VM Name | Node status | OS | vCPU | RAM | HD | IP |
+| VM Name | Node status | OS | vCPU | RAM (GB) | HD (GB) | IP |
 |---|---|---|---|---|---|---|
 | cp01 | Control plane | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.128 |
 | wn01 | Worker | Ubuntu 24.04.3 Minimal | 2 | 2 | 20 | 172.16.165.129 |
