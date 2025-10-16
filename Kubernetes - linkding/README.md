@@ -1,4 +1,4 @@
-# Setup K3s to deploy linkding
+# Setup K3s nodes to deploy linkding
 Macbook Air M2<br>
 VMware Fusion<br>
 K3s with 2 nodes
