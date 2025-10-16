@@ -101,17 +101,17 @@ spec:
 Run below command to deploy service<br>
 sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
 Run below command to check service<br>
-sudo k3s kubectl get service<br>
+sudo k3s kubectl get svc -A<br>
 ![Alt text](images/kuberctl_get-svc.png)
 
 # Setup administrator account for linkding
 sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
 Enter password<br>
 ![Alt text](images/create_superuser-account.png)
-<br>
+<br><br>
 Enter superuser credential<br>
 ![Alt text](images/enter_superuser_credential.png)
-<br>
+<br><br>
 In superuser profile
 ![Alt text](images/superuser_account.png)
 
