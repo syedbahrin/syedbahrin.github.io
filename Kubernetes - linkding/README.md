@@ -16,7 +16,9 @@ ubuntu-24.04.3-live-server-arm64.iso<br>
 ![Alt text](images/VMware_Fusion_VM_setting.png)
 
 # Update OS
+```text
 sudo apt update && sudo apt upgrade -y<br>
+```
 sudo reboot now
 
 # Configure /etc/hosts on both VMs, add two hostname 
@@ -29,7 +31,7 @@ sudo sed -i '/swap/d' /etc/fstab
 
 # Install K3s on Master node
 curl -sfL https://get.k3s.io | sh -
-<br><br>Run below command to check node status<br>
+<br>Run below command to check node status<br>
 sudo k3s kubectl get nodes
 
 # Copy token for next step
@@ -37,7 +39,7 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Install k3s on Worker node
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
-<br><br>Run below command on control plane node to check node status<br>
+<br>Run below command on control plane node to check node status<br>
 sudo k3s kubectl get nodes
 
 # Deploy linkding
