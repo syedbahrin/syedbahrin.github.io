@@ -1,0 +1,110 @@
+############################################################################
+# Create a Rocky Linux 9.6 VM: 
+# Network Configuration:
+# k8s-cp-01.k8s.com: IP 192.168.200.20, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-cp-02.k8s.com: IP 192.168.200.21, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-cp-03.k8s.com: IP 192.168.200.22, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-wn-01.k8s.com: IP 192.168.200.40, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+# k8s-wn-02.k8s.com: IP 192.168.200.41, Gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+############################################################################
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.20/24 ipv4.gateway 192.168.200.4 ipv4.method manual
+sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
+sudo nmcli connection down ens160
+sudo nmcli connection up ens160
+ip addr show ens160
+
+############################################################################
+# Disable Selinux and firewall, then reboot the VM:
+############################################################################
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
+
+############################################################################
+# Update OS and install VMware Tools:
+############################################################################
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+
+############################################################################
+# Disable swap:
+############################################################################
+swapoff -a
+sudo sed -i '/\/dev\mapper\/rl-swap/s/^/#/' /etc/fstab
+
+############################################################################
+# Configure sysctl for Kubernetes networking:
+############################################################################
+sudo tee /etc/modules-load.d/k8s.conf <<EOF
+overlay
+br_netfilter
+EOF
+
+sudo modprobe overlay && sudo modprobe br_netfilter
+
+sudo tee /etc/sysctl.d/k8s.conf <<EOF
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sudo sysctl --system
+
+############################################################################
+# Install Containerd:
+############################################################################
+
+sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install containerd.io -y
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+sudo sed -i 's|sandbox_image = "registry.k8s.io/pause:3\.[0-9]*"|sandbox_image = "registry.k8s.io/pause:3.10"|' /etc/containerd/config.toml
+sudo systemctl enable --now containerd
+
+############################################################################
+# Add Kubernetes repo:
+############################################################################
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
+EOF
+
+############################################################################
+# Install kubeadm, kubelet, kubectl:
+############################################################################
+sudo dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+sudo systemctl enable --now kubelet
+
+############################################################################
+# Initialize the Control Plane (on k8s-cp-01):
+############################################################################
+This command uses the VIP as the API endpoint.
+Note: The --pod-network-cidr is crucial and must be specified based on the CNI. For Cilium, a common choice is 10.244.0.0/16.
+	
+sudo kubeadm init --control-plane-endpoint "192.168.200.200:6443" --upload-certs --apiserver-advertise-address=192.168.200.20 --pod-network-cidr=10.244.0.0/16
+
+############################################################################
+# Join Worker Nodes (k8s-wn-01, k8s-wn-02):
+############################################################################
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+############################################################################
+# Join Other Control Plane Nodes (k8s-cp-02, k8s-cp-03):
+############################################################################
+Run the copied kubeadm join command for the control plane nodes, e.g.:
+
+sudo kubeadm join 192.168.200.200:6443 --token <token> --discovery-token-ca-cert-hash <hash> --control-plane --certificate-key <key>
+
+############################################################################
+# Join Worker Nodes (k8s-wn-01, k8s-wn-02):
+############################################################################
+Run the copied kubeadm join command for the worker nodes, e.g.:
+	
+sudo kubeadm join 192.168.200.200:6443 --token <token> --discovery-token-ca-cert-hash <hash>
+

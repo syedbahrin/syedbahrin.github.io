@@ -1,0 +1,109 @@
+############################################################################
+# DNS Server Setup (BIND)
+############################################################################
+Create a Rocky Linux 9.6 VM: k8s-dns.k8s.com.
+Network Configuration:
+# Set a static IP: 192.168.200.6.
+# Gateway: 192.168.200.4 (VyOS VIP).
+
+# Disable Selinux and firewall, then reboot the VM
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
+
+# Set ip and gateway
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.3/24 ipv4.gateway 192.168.200.4 ipv4.method manual
+sudo nmcli connection down ens160
+sudo nmcli connection up ens160
+ip addr show ens160
+
+# Update OS and install VMware Tools
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+
+# Install BIND
+sudo dnf install bind bind-utils -y
+sudo systemctl enable --now named
+
+############################################################################
+# Configure BIND:
+############################################################################
+Edit /etc/named.conf:
+sudo vi /etc/named.conf
+
+options {
+    listen-on port 53 { any; };
+    allow-query { any; };
+    recursion yes;
+    forwarders { 8.8.8.8; 8.8.4.4; }; // Use your preferred public DNS servers
+    directory "/var/named";
+    dump-file "/var/named/data/cache_dump.db";
+    statistics-file "/var/named/data/named_stats.txt";
+    memstatistics-file "/var/named/data/named_mem_stats.txt";
+    secroots-file "/var/named/data/named.secroots";
+    allow-recursion { localnets; };
+};
+zone "k8s.com" IN {
+    type master;
+    file "k8s.com.zone";
+};
+zone "200.168.192.in-addr.arpa" IN {
+    type master;
+    file "192.168.200.zone";
+};
+
+############################################################################
+# Create the forward zone file /var/named/k8s.com.zone:
+############################################################################
+sudo vi /var/named/k8s.com.zone
+
+$TTL 86400
+@       IN      SOA     k8s-dns.k8s.com. root.k8s.com. (
+                        2023082401 ; Serial
+                        3600       ; Refresh
+                        1800       ; Retry
+                        604800     ; Expire
+                        86400      ; Minimum TTL
+)
+@       IN      NS      k8s-dns.k8s.com.
+k8s-dns IN      A       192.168.200.6
+k8s-lb-01 IN    A       192.168.200.10
+k8s-lb-02 IN    A       192.168.200.11
+k8s-cp-01 IN    A       192.168.200.20
+k8s-cp-02 IN    A       192.168.200.21
+k8s-cp-03 IN    A       192.168.200.22
+k8s-wn-01 IN    A       192.168.200.30
+k8s-wn-02 IN    A       192.168.200.31
+
+############################################################################
+# Create the reverse zone file /var/named/192.168.200.zone:
+############################################################################
+sudo vi /var/named/192.168.200.zone
+
+$TTL 86400
+@       IN      SOA     k8s-dns.k8s.com. root.k8s.com. (
+                        2023082401 ; Serial
+                        3600       ; Refresh
+                        1800       ; Retry
+                        604800     ; Expire
+                        86400      ; Minimum TTL
+)
+@       IN      NS      k8s-dns.k8s.com.
+6       IN      PTR     k8s-dns.k8s.com.
+10      IN      PTR     k8s-lb-01.k8s.com.
+11      IN      PTR     k8s-lb-02.k8s.com.
+20      IN      PTR     k8s-cp-01.k8s.com.
+21      IN      PTR     k8s-cp-02.k8s.com.
+22      IN      PTR     k8s-cp-03.k8s.com.
+30      IN      PTR     k8s-wn-01.k8s.com.
+31      IN      PTR     k8s-wn-02.k8s.com.
+
+############################################################################
+# Set Permissions and Restart:
+############################################################################
+sudo chown -R named:named /var/named
+sudo systemctl restart named
+sudo named-checkconf
+sudo named-checkzone k8s.com /var/named/k8s.com.zone
+sudo named-checkzone 200.168.192.in-addr.arpa /var/named/192.168.200.zone
+

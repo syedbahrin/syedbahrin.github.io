@@ -1,0 +1,144 @@
+############################################################################
+# Create a Rocky Linux 9.6 VM: k8s-lb-01.k8s.com and k8s-lb-02.k8s.com
+############################################################################
+Network Configuration:
+# k8s-lb-01.k8s.com: 
+# Set a static IP: 192.168.200.10
+# Gateway: 192.168.200.4 (VyOS VIP)
+# DNS: 192.168.200.6, 8.8.8.8
+
+# k8s-lb-02.k8s.com: 
+# Set a static IP: 192.168.200.11
+# Gateway: 192.168.200.4 (VyOS VIP)
+# DNS: 192.168.200.6, 8.8.8.8
+
+# Disable Selinux and firewall, the reboot the VM
+sudo grubby --update-kernel ALL --args selinux=0
+sudo systemctl stop firewalld && sudo systemctl disable firewalld
+
+# Set ip and gateway
+sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.10/24 ipv4.gateway 192.168.200.4 ipv4.method manual
+sudo nmcli connection modify ens160 ipv4.dns "192.168.200.6,8.8.8.8"
+sudo nmcli connection down ens160
+sudo nmcli connection up ens160
+ip addr show ens160
+
+# Update OS and install VMware Tools
+sudo dnf update -y
+sudo dnf install open-vm-tools -y
+sudo dnf systemctl enable --now vmtoolsd
+
+############################################################################
+# Install HAProxy and Keepalived on Both VMs:
+############################################################################
+sudo dnf install haproxy keepalived -y
+
+############################################################################
+# Load Balancer (HAProxy/Keepalived) Setup
+############################################################################
+This step creates the highly available load balancer for the Kubernetes API server.
+Create Two Rocky Linux 9.6 VMs: k8s-lb-01.k8s.com and k8s-lb-02.k8s.com.
+Network Configuration:
+
+k8s-lb-01: 192.168.200.10, gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+k8s-lb-02: 192.168.200.11, gateway 192.168.200.4, DNS 192.168.200.6, 8.8.8.8
+
+############################################################################
+# HAProxy Configuration (/etc/haproxy/haproxy.cfg on both LB VMs):
+############################################################################
+global
+    log         /dev/log local0
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    log global
+    mode tcp
+    option tcplog
+    option dontlognull
+    timeout connect 5000ms
+    timeout client 50000ms
+    timeout server 50000ms
+
+frontend kubernetes-api
+    bind *:6443
+    mode tcp
+    default_backend kubernetes-control-planes
+
+backend kubernetes-control-planes
+    mode tcp
+    balance roundrobin
+    server k8s-cp-01 192.168.200.20:6443 check
+    server k8s-cp-02 192.168.200.21:6443 check
+    server k8s-cp-03 192.168.200.22:6443 check
+
+############################################################################
+# Keepalived Configuration:
+# k8s-lb-01
+############################################################################
+Master (/etc/keepalived/keepalived.conf on k8s-lb-01):
+
+vrrp_script chk_haproxy {
+  script "killall -0 haproxy"
+  interval 2
+  weight 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens160
+    virtual_router_id 51
+    priority 101
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass password
+    }
+    virtual_ipaddress {
+        192.168.200.200
+    }
+    track_script {
+        chk_haproxy
+    }
+}
+
+############################################################################
+# k8s-lb-02
+############################################################################
+Backup (/etc/keepalived/keepalived.conf on k8s-lb-02):
+
+vrrp_script chk_haproxy {
+  script "killall -0 haproxy"
+  interval 2
+  weight 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens160
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass password
+    }
+    virtual_ipaddress {
+        192.168.200.200
+    }
+    track_script {
+        chk_haproxy
+    }
+}
+
+############################################################################
+# Enable and Start Services on both LB VMs
+############################################################################
+sudo systemctl enable --now haproxy keepalived
+sudo systemctl status haproxy 
+sudo systemctl status keepalived

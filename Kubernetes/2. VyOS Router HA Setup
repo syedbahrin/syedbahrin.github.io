@@ -1,0 +1,65 @@
+############################################################################
+# VyOS (1.5-2025-Q2) Router HA Setup:
+############################################################################
+This step establishes the network gateway for the entire 192.168.200.0/24 subnet and provides high availability.
+Create Two VyOS VMs: k8s-vyos-01 and k8s-vyos-02.
+
+Network Adapters:
+Add two network adapters to each VyOS VM.
+eth0 (WAN): Connect to a bridged or NAT network in VMware (VMnet0) to get internet access via DHCP.
+eth1 (LAN): Connect to the custom VMnet10 (192.168.200.0/24).
+
+############################################################################
+# k8s-vyos-01 (Master node)
+############################################################################
+VyOS Configuration (Master - k8s-vyos-01):
+
+configure
+set system host-name k8s-vyos-01
+set interfaces ethernet eth0 address dhcp
+set interfaces ethernet eth1 address 192.168.200.2/24
+set nat source rule 10 outbound-interface 'eth0'
+set nat source rule 10 source address '192.168.200.0/24'
+set nat source rule 10 translation address 'masquerade'
+set high-availability vrrp group 10 interface eth1
+set high-availability vrrp group 10 vrid 10
+set high-availability vrrp group 10 address 192.168.200.4/24
+set high-availability vrrp group 10 peer-address 192.168.200.3
+set high-availability vrrp group 10 priority 110
+set high-availability vrrp sync-group k8s-api member k8s-api
+set service ssh port 22
+commit
+save
+
+############################################################################
+# k8s-vyos-02 (Backup node)
+############################################################################
+VyOS Configuration (Backup - k8s-vyos-02):
+
+configure
+set system host-name k8s-vyos-02
+set interfaces ethernet eth0 address dhcp
+set interfaces ethernet eth1 address 192.168.200.3/24
+set nat source rule 10 outbound-interface 'eth0'
+set nat source rule 10 source address '192.168.200.0/24'
+set nat source rule 10 translation address 'masquerade'
+set high-availability vrrp group 10 interface eth1
+set high-availability vrrp group 10 vrid 10
+set high-availability vrrp group 10 address 192.168.200.4/24
+set high-availability vrrp group 10 peer-address 192.168.200.2
+set high-availability vrrp sync-group k8s-api member k8s-api
+set high-availability vrrp group 10 priority 100
+set high-availability vrrp group 10 no-preempt
+set service ssh port 22
+commit
+save
+
+############################################################################
+# Verify VRRP:
+############################################################################
+On both VyOS VMs, 
+
+show vrrp
+
+You should see k8s-vyos-01 in the MASTER state and k8s-vyos-02 in the BACKUP state. 
+The VIP 192.168.200.4 should be active on the master.

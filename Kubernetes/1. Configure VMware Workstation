@@ -1,0 +1,9 @@
+VMware Workstation (17.6.4)and Network Configuration:
+
+Install VMware Workstation 17.6.
+
+Configure Virtual Networks:
+
+Go to Edit > Virtual Network Editor.
+
+Create a new custom virtual network, e.g., VMnet10, and configure it with the 192.168.200.0/24 subnet. Disable the DHCP service on this network.
