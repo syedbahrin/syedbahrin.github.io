@@ -54,7 +54,7 @@ Run below command on control plane node to check node status
 sudo k3s kubectl get nodes
 ```
 # Deploy linkding
-Create a yaml file deploy_linkding.yaml deploy linkding<br>
+Create a yaml file deploy_linkding.yaml deploy linkding
 
 ```yaml
 apiVersion: v1
@@ -83,19 +83,22 @@ spec:
           ports:
             - containerPort: 9090 
 ```
-Run below command to deploy linkding<br>
-sudo k3s kubectl apply -f deploy_linkding.yaml<br><br>
-
-Run below command to check linkding pod<br>
-sudo k3s kubectl get pods -n linkding<br>
+Run below command to deploy linkding
+```cmd
+sudo k3s kubectl apply -f deploy_linkding.yaml
+```
+Run below command to check linkding pod
+```cmd
+sudo k3s kubectl get pods -n linkding
+```
 ![Alt text](images/kuberctl_get_pods_n_linkding.png)
 
 # Create port forward
 ```cmd
-sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding<br>
+sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding
 ```
 # Create service for linkding
-Create a yaml file svc_linkding.yaml to deploy service<br>
+Create a yaml file svc_linkding.yaml to deploy service
 ```yaml
 apiVersion: v1
 kind: Service
@@ -112,7 +115,7 @@ spec:
       protocol: TCP
       name: http
 ```
-Run below command to deploy service<br>
+Run below command to deploy service
 ```cmd
 sudo k3s kubectl apply -f svc_linkding.yaml
 ```
@@ -124,7 +127,7 @@ sudo k3s kubectl get svc -A
 
 # Setup administrator account for linkding
 ```cmd
-sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
+sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com
 ```
 Enter password<br>
 ![Alt text](images/create_superuser-account.png)
