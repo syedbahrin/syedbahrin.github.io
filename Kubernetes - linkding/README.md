@@ -127,7 +127,7 @@ sudo k3s kubectl get svc -A
 
 # Setup administrator account for linkding
 ```cmd
-sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com
+sudo k3s kubectl exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com
 ```
 Enter password<br>
 ![Alt text](images/create_superuser-account.png)
