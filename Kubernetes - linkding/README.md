@@ -15,33 +15,46 @@ ubuntu-24.04.3-live-server-arm64.iso<br>
 # VM setting
 ![Alt text](images/VMware_Fusion_VM_setting.png)
 
-# Update OS
-sudo apt update && sudo apt upgrade -y<br>
+# Update OS and then reboot VM
+```cmd
+sudo apt update && sudo apt upgrade -y
+```
+```cmd
 sudo reboot now
-
+```
 # Configure /etc/hosts on both VMs, add two hostname 
 172.16.165.128 cp01<br>
 172.16.165.129 wn01
 
 # Disable swap (required by Kubernetes)
-sudo swapoff -a<br>
+```cmd
+sudo swapoff -a
+```
+```cmd
 sudo sed -i '/swap/d' /etc/fstab
-
+```
 # Install K3s on Master node
+```cmd
 curl -sfL https://get.k3s.io | sh -
-<br><br>Run below command to check node status<br>
+```
+Run below command to check node status
+```cmd
 sudo k3s kubectl get nodes
-
+```
 # Copy token for next step
+```cmd
 sudo cat /var/lib/rancher/k3s/server/node-token
-
+```
 # Install k3s on Worker node
+```cmd
 curl -sfL https://get.k3s.io | K3S_URL=https://<ip_master_node>:6443 K3S_TOKEN=Token_master_node sh -
-<br><br>Run below command on control plane node to check node status<br>
+```
+Run below command on control plane node to check node status
+```cmd
 sudo k3s kubectl get nodes
-
+```
 # Deploy linkding
-Create a yaml file deploy_linkding.yaml deploy linkding<br>
+Create a yaml file deploy_linkding.yaml deploy linkding
 
 ```yaml
 apiVersion: v1
@@ -70,18 +83,22 @@ spec:
           ports:
             - containerPort: 9090 
 ```
-Run below command to deploy linkding<br>
-sudo k3s kubectl apply -f deploy_linkding.yaml<br><br>
-
-Run below command to check linkding pod<br>
-sudo k3s kubectl get pods -n linkding<br>
+Run below command to deploy linkding
+```cmd
+sudo k3s kubectl apply -f deploy_linkding.yaml
+```
+Run below command to check linkding pod
+```cmd
+sudo k3s kubectl get pods -n linkding
+```
 ![Alt text](images/kuberctl_get_pods_n_linkding.png)
 
 # Create port forward
-sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding<br>
-
+```cmd
+sudo k3s kubectl port-forward pod/linkding-7d4c6f6dbb-6hbfl 9090:9090 -n linkding
+```
 # Create service for linkding
-Create a yaml file svc_linkding.yaml to deploy service<br>
+Create a yaml file svc_linkding.yaml to deploy service
 ```yaml
 apiVersion: v1
 kind: Service
@@ -98,14 +115,20 @@ spec:
       protocol: TCP
       name: http
 ```
-Run below command to deploy service<br>
-sudo k3s kubectl apply -f svc_linkding.yaml<br><br>
-Run below command to check service<br>
-sudo k3s kubectl get svc -A<br>
+Run below command to deploy service
+```cmd
+sudo k3s kubectl apply -f svc_linkding.yaml
+```
+Run below command to check service
+```cmd
+sudo k3s kubectl get svc -A
+```
 ![Alt text](images/kuberctl_get-svc.png)
 
 # Setup administrator account for linkding
-sudo k3s kubectl  exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com<br>
+```cmd
+sudo k3s kubectl exec -it linkding-7d4c6f6dbb-6hbfl -n linkding -- python3 manage.py createsuperuser --username=sysadmin --email=syedbahrin@example.com
+```
 Enter password<br>
 ![Alt text](images/create_superuser-account.png)
 
