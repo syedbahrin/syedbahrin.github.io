@@ -16,6 +16,9 @@ sudo nmcli connection down ens160
 sudo nmcli connection up ens160
 ip addr show ens160
 
+# Set hostname
+sudo hostnamectl set-hostname k8s-dns.k8s.com
+
 # Update OS and install VMware Tools
 sudo dnf update -y
 sudo dnf install open-vm-tools -y
