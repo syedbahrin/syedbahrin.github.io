@@ -18,7 +18,7 @@ configure
 set system host-name k8s-vyos-01
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth1 address 192.168.200.2/24
-set nat source rule 10 outbound-interface nameeth0
+set nat source rule 10 outbound-interface name eth0
 set nat source rule 10 source address 192.168.200.0/24
 set nat source rule 10 translation address masquerade
 set high-availability vrrp group 10 interface eth1
