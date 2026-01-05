@@ -12,8 +12,7 @@ sudo systemctl stop firewalld && sudo systemctl disable firewalld
 
 # Set ip and gateway
 sudo nmcli connection modify ens160 ipv4.addresses 192.168.200.3/24 ipv4.gateway 192.168.200.4 ipv4.method manual
-sudo nmcli connection down ens160
-sudo nmcli connection up ens160
+sudo nmcli connection down ens160 && sudo nmcli connection up ens160
 ip addr show ens160
 
 # Set hostname
