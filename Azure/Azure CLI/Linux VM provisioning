@@ -1,0 +1,23 @@
+Here is a streamlined guide to getting a Linux VM up and running quickly.
+
+1. Prerequisite: Create a Resource Group
+Before creating the VM, you need a container to hold it.
+az group create --name MyResourceGroup --location eastasia
+
+2. Create the VM
+The az vm create command is robust. By default, the following command will generate SSH keys for you if they don't exist.
+az vm create \
+  --resource-group MyResourceGroup \
+  --name MyUbuntuVM \
+  --image Ubuntu2204 \
+  --admin-username azureuser \
+  --generate-ssh-keys
+
+3. Open Port 22 (Optional but Recommended)
+To actually log in via SSH, you must ensure the network security group allows traffic on port 22.
+az vm open-port --port 22 --resource-group MyResourceGroup --name MyUbuntuVM
+
+4. Get your Public IP
+Once the VM is created, you’ll need the IP address to connect:
+az vm list-ip-addresses --resource-group MyResourceGroup --name MyUbuntuVM --output table
+
