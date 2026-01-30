@@ -24,3 +24,16 @@ az version
 ```cmd
 az login
 ```
+### Create a resource group
+#### PowerShell
+```cmd
+$rg = @{
+    Name = 'az104'
+    Location = 'eastasia'
+}
+New-AzResourceGroup @rg
+```
+#### Azure CLI
+```cmd
+az group create --name az104 --location eastasia
+```
