@@ -192,7 +192,7 @@ services:
     restart: unless-stopped
     container_name: grafana
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: dadc9dfd7a3ed45a2d7ab2cb67e3dd53652e378e9d2407bc
+      GF_SECURITY_ADMIN_PASSWORD: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       GF_SECURITY_ADMIN_USER: admin
     image: grafana/grafana:latest
     networks:
