@@ -1,0 +1,1067 @@
+Need refinement before PR
+[sysadmin@docker00 ~]$ ip -br addr
+ip route
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp1s0           UP             192.168.122.92/24 fe80::5054:ff:feb1:6d28/64 
+docker0          DOWN           172.17.0.1/16 
+default via 192.168.122.1 dev enp1s0 proto dhcp src 192.168.122.92 metric 100 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+192.168.122.0/24 dev enp1s0 proto kernel scope link src 192.168.122.92 metric 100 
+[sysadmin@docker00 ~]$ ip -4 addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    altname enx525400b16d28
+    inet 192.168.122.92/24 brd 192.168.122.255 scope global dynamic noprefixroute enp1s0
+       valid_lft 3422sec preferred_lft 3422sec
+3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+[sysadmin@docker00 ~]$ ping -c 3 192.168.122.92
+PING 192.168.122.92 (192.168.122.92) 56(84) bytes of data.
+64 bytes from 192.168.122.92: icmp_seq=1 ttl=64 time=0.030 ms
+64 bytes from 192.168.122.92: icmp_seq=2 ttl=64 time=0.034 ms
+64 bytes from 192.168.122.92: icmp_seq=3 ttl=64 time=0.071 ms
+
+--- 192.168.122.92 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2035ms
+rtt min/avg/max/mdev = 0.030/0.045/0.071/0.018 ms
+[sysadmin@docker00 ~]$ sudo dnf -y install docker-ce docker-ce-cli \
+  containerd.io docker-buildx-plugin docker-compose-plugin
+[sudo] password for sysadmin: 
+Last metadata expiration check: 0:18:44 ago on Fri 09 Oct 2026 08:24:56 PM +08.
+Package docker-ce-3:29.9.0-1.el10.x86_64 is already installed.
+Package docker-ce-cli-1:29.9.0-1.el10.x86_64 is already installed.
+Package containerd.io-2.4.1-2.el10.x86_64 is already installed.
+Package docker-buildx-plugin-0.38.0-1.el10.x86_64 is already installed.
+Package docker-compose-plugin-5.6.0-1.el10.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+[sysadmin@docker00 ~]$ sudo docker version
+sudo docker compose version
+sudo docker run --rm hello-world
+Client: Docker Engine - Community
+ Version:           29.9.0
+ API version:       1.56
+ Go version:        go1.26.9
+ Git commit:        f415da8
+ Built:             Thu Oct  8 20:41:57 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          29.9.0
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.9
+  Git commit:       a5b58c9
+  Built:            Thu Oct  8 20:37:44 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.1
+  GitCommit:        f2551031d7276a770f65f98c9b52e57e7dad07e8
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+Docker Compose version v5.6.0
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pull complete 
+d5e71e642bf5: Download complete 
+Digest: sha256:5e23090353324d887c48ad5e5c56d294eab81588df9605b07d1afe895f9cc8f8
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+[sysadmin@docker00 ~]$ sudo mkdir -p /opt/observability/{prometheus,loki,grafana}
+sudo chown -R "$USER":"$(id -gn)" /opt/observability
+cd /opt/observability
+[sysadmin@docker00 observability]$ ls
+grafana  loki  prometheus
+[sysadmin@docker00 observability]$ vi compose.yaml
+[sysadmin@docker00 observability]$ vi compose.yaml
+[sysadmin@docker00 observability]$ pwd
+/opt/observability
+[sysadmin@docker00 observability]$ umask 077
+printf 'GRAFANA_ADMIN_PASSWORD=%s\n' \
+  "$(openssl rand -hex 24)" > .env
+cat .env
+-bash: openssl: command not found
+GRAFANA_ADMIN_PASSWORD=
+[sysadmin@docker00 observability]$ sudo dnf install -y openssl
+Last metadata expiration check: 0:22:22 ago on Fri 09 Oct 2026 08:24:56 PM +08.
+Dependencies resolved.
+=====================================================================================================================================================
+ Package                          Architecture                    Version                                      Repository                       Size
+=====================================================================================================================================================
+Installing:
+ openssl                          x86_64                          1:3.5.8-2.el10_2                             baseos                          1.2 M
+
+Transaction Summary
+=====================================================================================================================================================
+Install  1 Package
+
+Total download size: 1.2 M
+Installed size: 1.8 M
+Downloading Packages:
+openssl-3.5.8-2.el10_2.x86_64.rpm                                                                                    3.7 MB/s | 1.2 MB     00:00    
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                1.0 MB/s | 1.2 MB     00:01     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                             1/1 
+  Installing       : openssl-1:3.5.8-2.el10_2.x86_64                                                                                             1/1 
+  Running scriptlet: openssl-1:3.5.8-2.el10_2.x86_64                                                                                             1/1 
+
+Installed:
+  openssl-1:3.5.8-2.el10_2.x86_64                                                                                                                    
+
+Complete!
+[sysadmin@docker00 observability]$ umask 077
+printf 'GRAFANA_ADMIN_PASSWORD=%s\n' \
+  "$(openssl rand -hex 24)" > .env
+cat .env
+GRAFANA_ADMIN_PASSWORD=dadc9dfd7a3ed45a2d7ab2cb67e3dd53652e378e9d2407bc
+[sysadmin@docker00 observability]$ nano ^Cpt/observability/prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ pwd
+/opt/observability
+[sysadmin@docker00 observability]$ vi /opt/observability/prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ vi /prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ ls
+compose.yaml  grafana  loki  prometheus
+[sysadmin@docker00 observability]$ vi /opt/observability/prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ 
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: rocky-linux
+    static_configs:
+      - targets: ["192.168.122.XX:9100"]
+        labels:
+          environment: lab
+          os: rocky-linux^C
+
+[sysadmin@docker00 observability]$ ^C
+[sysadmin@docker00 observability]$ ^C
+[sysadmin@docker00 observability]$ ^C
+[sysadmin@docker00 observability]$ vi /opt/observability/loki/config.yml
+[sysadmin@docker00 observability]$ vi /opt/observability/loki/config.yml
+[sysadmin@docker00 observability]$ ls
+compose.yaml  grafana  loki  prometheus
+[sysadmin@docker00 observability]$ cd /opt/observability
+[sysadmin@docker00 observability]$ sudo docker compose --env-file .env config
+sudo docker compose --env-file .env pull
+sudo docker compose --env-file .env up -d
+name: observability
+services:
+  grafana:
+    restart: unless-stopped
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      GF_SECURITY_ADMIN_USER: admin
+    image: grafana/grafana:latest
+    networks:
+      observability: null
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+        volume: {}
+    ports:
+      - mode: ingress
+        host_ip: 192.168.122.92
+        target: 3000
+        published: "3000"
+        protocol: tcp
+  loki:
+    restart: unless-stopped
+    container_name: loki
+    command:
+      - -config.file=/etc/loki/config.yml
+    image: grafana/loki:3.6.0
+    networks:
+      observability: null
+    volumes:
+      - type: bind
+        source: /opt/observability/loki/config.yml
+        target: /etc/loki/config.yml
+        read_only: true
+        bind: {}
+      - type: volume
+        source: loki-data
+        target: /loki
+        volume: {}
+    ports:
+      - mode: ingress
+        host_ip: 192.168.122.92
+        target: 3100
+        published: "3100"
+        protocol: tcp
+  prometheus:
+    restart: unless-stopped
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    image: prom/prometheus:latest
+    networks:
+      observability: null
+    volumes:
+      - type: bind
+        source: /opt/observability/prometheus/prometheus.yml
+        target: /etc/prometheus/prometheus.yml
+        read_only: true
+        bind: {}
+      - type: volume
+        source: prometheus-data
+        target: /prometheus
+        volume: {}
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 9090
+        published: "9090"
+        protocol: tcp
+networks:
+  observability:
+    name: observability_observability
+volumes:
+  grafana-data:
+    name: observability_grafana-data
+  loki-data:
+    name: observability_loki-data
+  prometheus-data:
+    name: observability_prometheus-data
+[+] pull 40/40
+ ✔ Image grafana/loki:3.6.0     Pulled                                                                                                          22.8s
+ ✔ Image grafana/grafana:latest Pulled                                                                                                          42.7s
+ ✔ Image prom/prometheus:latest Pulled                                                                                                          32.6s
+[+] up 7/7
+ ✔ Network observability_observability  Created                                                                                                  0.2s
+ ✔ Volume observability_prometheus-data Created                                                                                                  0.0s
+ ✔ Volume observability_grafana-data    Created                                                                                                  0.0s
+ ✔ Volume observability_loki-data       Created                                                                                                  0.1s
+ ✔ Container prometheus                 Started                                                                                                  1.6s
+ ✔ Container loki                       Started                                                                                                  1.0s
+ ✔ Container grafana                    Started                                                                                                  1.3s
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      9 seconds ago   Up 8 seconds                   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         9 seconds ago   Up Less than a second          192.168.122.92:3100->3100/tcp
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   9 seconds ago   Restarting (2) 3 seconds ago   
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED          STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      19 seconds ago   Up 18 seconds                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         19 seconds ago   Restarting (1) 3 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   19 seconds ago   Restarting (2) 3 seconds ago   
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED          STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      22 seconds ago   Up 21 seconds                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         22 seconds ago   Restarting (1) 6 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   22 seconds ago   Restarting (2) 6 seconds ago   
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED          STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      24 seconds ago   Up 23 seconds                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         24 seconds ago   Restarting (1) 8 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   24 seconds ago   Restarting (2) 8 seconds ago   
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED          STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      31 seconds ago   Up 30 seconds                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         31 seconds ago   Restarting (1) 2 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   31 seconds ago   Restarting (2) 2 seconds ago   
+[sysadmin@docker00 observability]$ sudo docker compose logs --tail=100
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+loki  | failed parsing config: open /etc/loki/config.yml: permission denied. Use `-config.expand-env=true` flag if you want to expand environment variables in your config file
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.739616842Z level=info msg=starting module=provisioning
+grafana  | t=2026-10-09T12:53:02.739713864Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.739705839Z msg="App initialized" app=playlist
+grafana  | logger=provisioning.alerting t=2026-10-09T12:53:02.740143521Z level=info msg="starting to provision alerting"
+grafana  | logger=provisioning.alerting t=2026-10-09T12:53:02.740207451Z level=info msg="finished to provision alerting"
+grafana  | t=2026-10-09T12:53:02.739656266Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.739651747Z msg="App initialized" app=alerting-notifications
+grafana  | t=2026-10-09T12:53:02.740159591Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.740152067Z msg="start concurrent job driver" logger=concurrent-job-driver num_drivers=3 job_timeout=20m0s lease_renewal_interval=20s
+grafana  | t=2026-10-09T12:53:02.740191421Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.740169169Z msg="starting job cleanup controller" logger=job-cleanup-controller cleanup_interval=3m0s expiry=1m0s
+grafana  | logger=bleve-backend namespace=default group=dashboard.grafana.app resource=dashboards reason=search t=2026-10-09T12:53:02.814056712Z level=info msg="Building index using memory"
+grafana  | logger=bleve-backend namespace=default group=dashboard.grafana.app resource=dashboards reason=search t=2026-10-09T12:53:02.814622234Z level=info msg="Finished building index" elapsed=403.387µs listRV=1791550379703010
+grafana  | logger=bleve-backend namespace=default group=dashboard.grafana.app resource=dashboards reason=search t=2026-10-09T12:53:02.814683719Z level=info msg="Storing index in cache" key="{Namespace:default Group:dashboard.grafana.app Resource:dashboards}" expiration=2026-10-09T13:03:02.814672127Z
+grafana  | t=2026-10-09T12:53:02.841250552Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.84123908Z msg="Starting RepositoryController" logger=provisioning-repository-controller
+grafana  | t=2026-10-09T12:53:02.841351973Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.841343807Z msg="Starting workers" logger=provisioning-repository-controller count=1
+grafana  | t=2026-10-09T12:53:02.841250652Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.841236135Z msg="Starting ConnectionController" logger=provisioning-connection-controller
+grafana  | t=2026-10-09T12:53:02.841511603Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.841506403Z msg="Started workers" logger=provisioning-repository-controller
+grafana  | t=2026-10-09T12:53:02.841676472Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.841521161Z msg="Starting workers" logger=provisioning-connection-controller count=1
+grafana  | t=2026-10-09T12:53:02.84192029Z level=info caller=logger.go:214 time=2026-10-09T12:53:02.84190445Z msg="Started workers" logger=provisioning-connection-controller
+grafana  | logger=provisioning.dashboard t=2026-10-09T12:53:02.962615961Z level=info msg="starting to provision dashboards"
+grafana  | logger=provisioning.dashboard t=2026-10-09T12:53:02.96268967Z level=info msg="finished to provision dashboards"
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980432765Z level=info msg=starting module=*supportbundlesimpl.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980453985Z level=info msg=starting module=*api.HTTPServer
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980460838Z level=info msg=starting module=*updatemanager.PluginsService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980468802Z level=info msg=starting module=*service.DashboardUpdater
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980475114Z level=info msg=starting module=*service.DashboardServiceImpl
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980482709Z level=info msg=starting module=*metric.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980488139Z level=info msg=starting module=*rendering.RenderingService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980491846Z level=info msg=starting module=*pushhttp.Gateway
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980495733Z level=info msg=starting module=*anonimpl.AnonDeviceService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980498729Z level=info msg=starting module=*migrations.SecretMigrationProviderImpl
+grafana  | logger=http.server t=2026-10-09T12:53:02.98357239Z level=info msg="HTTP Server Listen" address=[::]:3000 protocol=http subUrl= socket=
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980504991Z level=info msg=starting module=*dynamic.KeyRetriever
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980508657Z level=info msg=starting module=*ngalert.AlertNG
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980501955Z level=info msg=starting module=*appregistry.Service
+grafana  | logger=app-registry t=2026-10-09T12:53:02.997972088Z level=info msg="app registry initialized"
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980525138Z level=info msg=starting module=*authimpl.UserAuthTokenService
+grafana  | logger=ngalert t=2026-10-09T12:53:02.997897738Z level=info msg="Primary node, alert rule evaluation enabled"
+grafana  | logger=ngalert.state.manager t=2026-10-09T12:53:02.998297719Z level=info msg="Warming state cache for startup"
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980519909Z level=info msg=starting module=*garbagecollectionworker.Worker
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980529266Z level=info msg=starting module=*metrics.InternalMetricsService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980538824Z level=info msg=starting module=*remotecache.RemoteCache
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980546929Z level=info msg=starting module=*manager.SecretsService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980513206Z level=info msg=starting module=*manager.ServiceAccountsService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980555335Z level=info msg=starting module=*store.standardStorageService
+grafana  | logger=grafanaStorageLogger t=2026-10-09T12:53:02.998850817Z level=info msg="Storage starting"
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980570363Z level=info msg=starting module=*updatemanager.GrafanaService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980564583Z level=info msg=starting module=*notifications.NotificationService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980574491Z level=info msg=starting module=*statscollector.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980580663Z level=info msg=starting module=*cleanup.CleanUpService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980586193Z level=info msg=starting module=*service.UsageStats
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980600921Z level=info msg=starting module=*pluginexternal.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980607694Z level=info msg=starting module=*live.GrafanaLive
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980615037Z level=info msg=starting module=*angulardetectorsprovider.Dynamic
+grafana  | logger=ngalert.multiorg.alertmanager t=2026-10-09T12:53:02.999726812Z level=info msg="Starting MultiOrg Alertmanager"
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980533574Z level=info msg=starting module=*ssosettingsimpl.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980551207Z level=info msg=starting module=*authz.EmbeddedZanzanaService
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980560074Z level=info msg=starting module=*dualwrite.ZanzanaReconciler
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:02.980543132Z level=info msg=starting module=*loginattemptimpl.Service
+grafana  | logger=backgroundsvcs.managerAdapter t=2026-10-09T12:53:03.00022072Z level=info msg="All modules healthy"
+grafana  | logger=plugin.backgroundinstaller t=2026-10-09T12:53:03.155818495Z level=info msg="Installing plugin" pluginId=jaeger version=
+grafana  | logger=ngalert.state.manager t=2026-10-09T12:53:03.160535422Z level=info msg="State cache has been initialized" rules=0 states=0 duration=162.237743ms
+grafana  | logger=ngalert.scheduler t=2026-10-09T12:53:03.160567151Z level=info msg="Starting scheduler" tickInterval=10s maxAttempts=3
+grafana  | logger=ngalert.scheduler t=2026-10-09T12:53:03.160682899Z level=info msg=starting component=ticker first_tick=2026-10-09T12:53:10Z
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.421907372Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.421962194Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.421976321Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.421988343Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422000075Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422010976Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422021015Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422031564Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422042675Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422056582Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422068354Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422078573Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.422091026Z level=info msg="Update check succeeded" duration=440.853811ms
+grafana  | logger=plugins.update.checker t=2026-10-09T12:53:03.42209832Z level=info msg="flag evaluation succeeded" flag="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}" details="{Value:false EvaluationDetails:{FlagKey:pluginsAutoUpdate FlagType:bool ResolutionDetail:{Variant:default Reason:STATIC ErrorCode: ErrorMessage: FlagMetadata:map[]}}}"
+grafana  | logger=plugin.installer t=2026-10-09T12:53:03.422137494Z level=info msg="Updating plugin" pluginId=jaeger from=13.0.3 to=13.0.5
+grafana  | logger=grafana.update.checker t=2026-10-09T12:53:03.422987971Z level=info msg="Update check succeeded" duration=423.836018ms
+grafana  | logger=plugin.jaeger t=2026-10-09T12:53:03.423673017Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/jaeger/gpx_grafana-jaeger-datasource_linux_amd64 id=44
+grafana  | logger=plugin.angulardetectorsprovider.dynamic t=2026-10-09T12:53:03.487122511Z level=info msg="Patterns update finished" duration=325.944834ms
+grafana  | logger=installer.fs t=2026-10-09T12:53:07.821645066Z level=info msg="Downloaded and extracted jaeger v13.0.5 zip successfully to /var/lib/grafana/plugins/jaeger"
+grafana  | logger=plugins.registration t=2026-10-09T12:53:07.850420165Z level=info msg="Plugin registered" pluginId=jaeger
+grafana  | logger=plugin.backgroundinstaller t=2026-10-09T12:53:07.85049772Z level=info msg="Plugin successfully installed" pluginId=jaeger version= duration=4.694661872s
+grafana  | logger=plugin.backgroundinstaller t=2026-10-09T12:53:07.850528739Z level=info msg="Installing plugin" pluginId=grafana-metricsdrilldown-app version=
+grafana  | logger=plugin.installer t=2026-10-09T12:53:08.553002856Z level=info msg="Installing plugin" pluginId=grafana-metricsdrilldown-app version=
+grafana  | logger=installer.fs t=2026-10-09T12:53:08.603779536Z level=info msg="Downloaded and extracted grafana-metricsdrilldown-app v3.0.0 zip successfully to /var/lib/grafana/plugins/grafana-metricsdrilldown-app"
+grafana  | logger=plugins.registration t=2026-10-09T12:53:08.620635014Z level=info msg="Plugin registered" pluginId=grafana-metricsdrilldown-app
+grafana  | logger=plugin.backgroundinstaller t=2026-10-09T12:53:08.620648179Z level=info msg="Plugin successfully installed" pluginId=grafana-metricsdrilldown-app version= duration=770.08161ms
+grafana  | logger=plugin.backgroundinstaller t=2026-10-09T12:53:08.952273089Z level=info msg="Installing plugin" pluginId=elasticsearch version=
+grafana  | logger=plugin.installer t=2026-10-09T12:53:09.258581413Z level=info msg="Updating plugin" pluginId=elasticsearch from=12.9.1 to=12.9.2
+grafana  | logger=plugin.elasticsearch t=2026-10-09T12:53:09.260473966Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/elasticsearch/gpx_grafana_elasticsearch_datasource_linux_amd64 id=17
+grafana  | logger=installer.fs t=2026-10-09T12:53:12.715682362Z level=info msg="Downloaded and extracted elasticsearch v12.9.2 zip successfully to /var/lib/grafana/plugins/elasticsearch"
+grafana  | logger=plugins.registration t=2026-10-09T12:53:12.785677517Z level=info msg="Plugin registered" pluginId=elasticsearch
+prometheus  | time=2026-10-09T12:52:41.610Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:42.035Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:42.473Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:43.125Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:44.166Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:46.023Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:49.523Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:56.196Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:53:09.372Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:12.785760694Z level=info msg="Plugin successfully installed" pluginId=elasticsearch version= duration=3.833468189s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:13.047237079Z level=info msg="Installing plugin" pluginId=mysql version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:13.355991617Z level=info msg="Updating plugin" pluginId=mysql from=13.1.2 to=13.1.4
+grafana     | logger=plugin.mysql t=2026-10-09T12:53:13.357765167Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/mysql/gpx_grafana-mysql-datasource_linux_amd64 id=65
+grafana     | logger=installer.fs t=2026-10-09T12:53:16.977004402Z level=info msg="Downloaded and extracted mysql v13.1.4 zip successfully to /var/lib/grafana/plugins/mysql"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:17.020236727Z level=info msg="Plugin registered" pluginId=mysql
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:17.020377772Z level=info msg="Plugin successfully installed" pluginId=mysql version= duration=3.973087713s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:17.02040374Z level=info msg="Installing plugin" pluginId=grafana-lokiexplore-app version=
+[sysadmin@docker00 observability]$ chmod 644 loki/config.yml prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ chmod 755 loki prometheus .
+[sysadmin@docker00 observability]$ ls -la loki/config.yml prometheus/prometheus.yml
+-rw-r--r-- 1 sysadmin sysadmin 676 Oct  9 20:51 loki/config.yml
+-rw-r--r-- 1 sysadmin sysadmin 316 Oct  9 20:50 prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ sudo docker compose restart loki prometheus
+[+] restart 0/2
+ ⠸ Container prometheus Restarting                                                                                                                                                 0.4s
+ ⠸ Container loki       Restarting                                                                                                                                                 0.4s
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                        PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      2 minutes ago   Up 2 minutes                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         2 minutes ago   Restarting (1) 1 second ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   2 minutes ago   Up 6 seconds                  127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                                  PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      2 minutes ago   Up 2 minutes                            192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         2 minutes ago   Restarting (1) Less than a second ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   2 minutes ago   Up 8 seconds                            127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                        PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      2 minutes ago   Up 2 minutes                  192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         2 minutes ago   Restarting (1) 1 second ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   2 minutes ago   Up 9 seconds                  127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      2 minutes ago   Up 2 minutes                   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         2 minutes ago   Restarting (1) 3 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   2 minutes ago   Up 11 seconds                  127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      2 minutes ago   Up 2 minutes                   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         2 minutes ago   Restarting (1) 4 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   2 minutes ago   Up 11 seconds                  127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ ls -la loki/config.yml prometheus/prometheus.yml
+-rw-r--r-- 1 sysadmin sysadmin 676 Oct  9 20:51 loki/config.yml
+-rw-r--r-- 1 sysadmin sysadmin 316 Oct  9 20:50 prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ sudo docker compose logs --tail=100
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | level=info ts=2026-10-09T12:54:42.189459587Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki  | level=info ts=2026-10-09T12:54:42.189488852Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki  | level=info ts=2026-10-09T12:54:42.190476116Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki  | level=error ts=2026-10-09T12:54:42.192387726Z caller=log.go:223 msg="error running loki" err="mkdir /loki/chunks: permission denied\nerror creating object client\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).chunkClientForPeriod\n\t/src/loki/pkg/storage/store.go:241\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).init\n\t/src/loki/pkg/storage/store.go:201\ngithub.com/grafana/loki/v3/pkg/storage.NewStore\n\t/src/loki/pkg/storage/store.go:193\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).initStore\n\t/src/loki/pkg/loki/modules.go:902\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:136\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700\nerror initialising module: store\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+loki  | failed to create object client: mkdir /loki/chunks: permission denied
+loki  | error initialising module: compactor
+loki  | github.com/grafana/dskit/modules.(*Manager).initModule
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138
+loki  | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki  | 	/src/loki/pkg/loki/loki.go:549
+loki  | main.main
+loki  | 	/src/loki/cmd/loki/main.go:130
+loki  | runtime.main
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | level=info ts=2026-10-09T12:54:43.224665152Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki  | level=info ts=2026-10-09T12:54:43.224692003Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki  | level=info ts=2026-10-09T12:54:43.225827614Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki  | level=error ts=2026-10-09T12:54:43.228031703Z caller=log.go:223 msg="error running loki" err="failed to create object client: mkdir /loki/chunks: permission denied\nerror initialising module: compactor\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+loki  | failed to create object client: mkdir /loki/chunks: permission denied
+loki  | error initialising module: compactor
+loki  | github.com/grafana/dskit/modules.(*Manager).initModule
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138
+loki  | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki  | 	/src/loki/pkg/loki/loki.go:549
+loki  | main.main
+loki  | 	/src/loki/cmd/loki/main.go:130
+loki  | runtime.main
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | level=info ts=2026-10-09T12:54:45.070467287Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki  | level=info ts=2026-10-09T12:54:45.070492945Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki  | level=info ts=2026-10-09T12:54:45.071764132Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki  | level=error ts=2026-10-09T12:54:45.073536921Z caller=log.go:223 msg="error running loki" err="failed to create object client: mkdir /loki/chunks: permission denied\nerror initialising module: compactor\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+loki  | mkdir /loki/chunks: permission denied
+loki  | error creating object client
+loki  | github.com/grafana/loki/v3/pkg/storage.(*LokiStore).chunkClientForPeriod
+loki  | 	/src/loki/pkg/storage/store.go:241
+loki  | github.com/grafana/loki/v3/pkg/storage.(*LokiStore).init
+loki  | 	/src/loki/pkg/storage/store.go:201
+loki  | github.com/grafana/loki/v3/pkg/storage.NewStore
+loki  | 	/src/loki/pkg/storage/store.go:193
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).initStore
+loki  | 	/src/loki/pkg/loki/modules.go:902
+loki  | github.com/grafana/dskit/modules.(*Manager).initModule
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:136
+loki  | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki  | 	/src/loki/pkg/loki/loki.go:549
+loki  | main.main
+loki  | 	/src/loki/cmd/loki/main.go:130
+loki  | runtime.main
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | error initialising module: store
+loki  | github.com/grafana/dskit/modules.(*Manager).initModule
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138
+loki  | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki  | 	/src/loki/pkg/loki/loki.go:549
+loki  | main.main
+loki  | 	/src/loki/cmd/loki/main.go:130
+loki  | runtime.main
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | level=info ts=2026-10-09T12:54:48.519293589Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki  | level=info ts=2026-10-09T12:54:48.519323325Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki  | level=info ts=2026-10-09T12:54:48.52048697Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki  | level=error ts=2026-10-09T12:54:48.52239862Z caller=log.go:223 msg="error running loki" err="mkdir /loki/chunks: permission denied\nerror creating object client\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).chunkClientForPeriod\n\t/src/loki/pkg/storage/store.go:241\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).init\n\t/src/loki/pkg/storage/store.go:201\ngithub.com/grafana/loki/v3/pkg/storage.NewStore\n\t/src/loki/pkg/storage/store.go:193\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).initStore\n\t/src/loki/pkg/loki/modules.go:902\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:136\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700\nerror initialising module: store\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+loki  | failed to create object client: mkdir /loki/chunks: permission denied
+loki  | error initialising module: compactor
+loki  | github.com/grafana/dskit/modules.(*Manager).initModule
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138
+loki  | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki  | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki  | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki  | 	/src/loki/pkg/loki/loki.go:549
+loki  | main.main
+loki  | 	/src/loki/cmd/loki/main.go:130
+loki  | runtime.main
+loki  | 	/usr/local/go/src/runtime/proc.go:283
+loki  | runtime.goexit
+loki  | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki  | level=info ts=2026-10-09T12:54:55.165133836Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki  | level=info ts=2026-10-09T12:54:55.165207984Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki  | level=info ts=2026-10-09T12:54:55.166897166Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki  | level=error ts=2026-10-09T12:54:55.168473927Z caller=log.go:223 msg="error running loki" err="failed to create object client: mkdir /loki/chunks: permission denied\nerror initialising module: compactor\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+prometheus  | time=2026-10-09T12:52:41.610Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:42.035Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:42.473Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:43.125Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:44.166Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:46.023Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:49.523Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:52:56.196Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:53:09.372Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:53:35.861Z level=ERROR source=main.go:768 msg="Error loading config (--config.file=/etc/prometheus/prometheus.yml)" file=/etc/prometheus/prometheus.yml err="open /etc/prometheus/prometheus.yml: permission denied"
+prometheus  | time=2026-10-09T12:54:27.268Z level=INFO source=main.go:1770 msg="updated GOGC" old=100 new=75
+prometheus  | time=2026-10-09T12:54:27.268Z level=INFO source=main.go:824 msg="Leaving GOMAXPROCS=2: CPU quota undefined" component=automaxprocs
+prometheus  | time=2026-10-09T12:54:27.269Z level=INFO source=memlimit.go:198 msg="GOMEMLIMIT is updated" component=automemlimit package=github.com/KimMachineGun/automemlimit/memlimit GOMEMLIMIT=3447524966 previous=9223372036854775807
+prometheus  | time=2026-10-09T12:54:27.269Z level=INFO source=main.go:933 msg="Starting Prometheus Server" mode=server version="(version=3.15.0, branch=HEAD, revision=5241a27fe3c6983549fccc32f6e65917408c63cd)"
+prometheus  | time=2026-10-09T12:54:27.269Z level=INFO source=main.go:938 msg="operational information" build_context="(go=go1.27.1, platform=linux/amd64, user=root@4635dd007a60, date=20260925-07:33:45, tags=netgo,builtinassets)" host_details="(Linux 6.12.0-211.62.1.el10_2.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Oct  5 16:39:25 UTC 2026 x86_64 16bc95b2578a (none))" fd_limits="(soft=524287, hard=524288)" vm_limits="(soft=unlimited, hard=unlimited)"
+prometheus  | time=2026-10-09T12:54:27.383Z level=INFO source=web.go:727 msg="Start listening for connections" component=web address=0.0.0.0:9090
+prometheus  | time=2026-10-09T12:54:27.389Z level=INFO source=main.go:1499 msg="Starting TSDB ..."
+prometheus  | time=2026-10-09T12:54:27.391Z level=INFO source=head.go:753 msg="Replaying on-disk memory mappable chunks if any" component=tsdb
+prometheus  | time=2026-10-09T12:54:27.391Z level=INFO source=head.go:838 msg="On-disk memory mappable chunks replay completed" component=tsdb duration=1.102µs
+prometheus  | time=2026-10-09T12:54:27.391Z level=INFO source=head.go:846 msg="Replaying WAL, this may take a while" component=tsdb
+prometheus  | time=2026-10-09T12:54:27.392Z level=INFO source=tls_config.go:381 msg="Listening on" component=web address=[::]:9090
+prometheus  | time=2026-10-09T12:54:27.392Z level=INFO source=tls_config.go:384 msg="TLS is disabled." component=web http2=false address=[::]:9090
+prometheus  | time=2026-10-09T12:54:27.392Z level=INFO source=head.go:941 msg="WAL segment loaded" component=tsdb segment=0 maxSegment=0 duration=127.44µs
+prometheus  | time=2026-10-09T12:54:27.392Z level=INFO source=head.go:978 msg="WAL replay completed" component=tsdb checkpoint_replay_duration=199.725µs wal_replay_duration=142.808µs wbl_replay_duration=130ns chunk_snapshot_load_duration=0s mmap_chunk_replay_duration=1.102µs total_replay_duration=356.679µs
+prometheus  | time=2026-10-09T12:54:27.393Z level=INFO source=main.go:1520 msg="filesystem information" fs_type=XFS_SUPER_MAGIC
+prometheus  | time=2026-10-09T12:54:27.393Z level=INFO source=main.go:1523 msg="TSDB started"
+prometheus  | time=2026-10-09T12:54:27.393Z level=INFO source=main.go:1721 msg="Loading configuration file" filename=/etc/prometheus/prometheus.yml
+prometheus  | time=2026-10-09T12:54:27.393Z level=INFO source=main.go:1137 msg="TSDB retention updated" duration=15d size=0B percentage=0
+prometheus  | time=2026-10-09T12:54:27.394Z level=INFO source=main.go:1763 msg="Completed loading of configuration file" db_storage=25.197µs remote_storage=2.385µs web_handler=301ns query_engine=701ns scrape=558.369µs scrape_sd=22.031µs notify=902ns notify_sd=491ns rules=1.092µs tracing=3.216µs filename=/etc/prometheus/prometheus.yml totalDuration=889.259µs
+prometheus  | time=2026-10-09T12:54:27.394Z level=INFO source=main.go:1484 msg="Server is ready to receive web requests."
+prometheus  | time=2026-10-09T12:54:27.394Z level=INFO source=manager.go:235 msg="Starting rule manager..." component="rule manager"
+prometheus  | time=2026-10-09T12:54:40.408Z level=WARN source=main.go:1280 msg="Received an OS signal, exiting gracefully..." signal=terminated
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1305 msg="Stopping scrape discovery manager..."
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1319 msg="Stopping notify discovery manager..."
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1334 msg="Stopping rule manager manager..."
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=manager.go:249 msg="Stopping rule manager..." component="rule manager"
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=manager.go:265 msg="Rule manager stopped" component="rule manager"
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1358 msg="Stopping scrape manager..."
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1350 msg="Scrape manager stopped"
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1301 msg="Scrape discovery manager stopped"
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1315 msg="Notify discovery manager stopped"
+prometheus  | time=2026-10-09T12:54:40.408Z level=INFO source=main.go:1330 msg="Rule manager stopped"
+prometheus  | time=2026-10-09T12:54:40.409Z level=INFO source=main.go:1373 msg="Stopping tracing manager..."
+prometheus  | time=2026-10-09T12:54:40.409Z level=INFO source=main.go:1458 msg="Stopping reloaders..."
+prometheus  | time=2026-10-09T12:54:40.409Z level=INFO source=main.go:1547 msg="Stopping storage..."
+prometheus  | time=2026-10-09T12:54:40.409Z level=INFO source=main.go:1369 msg="Tracing manager stopped"
+prometheus  | time=2026-10-09T12:54:40.409Z level=INFO source=main.go:1450 msg="Reloaders stopped"
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1625 msg="Stopping web handler..."
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1543 msg="TSDB stopped"
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1648 msg="Stopping notifier manager..."
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=manager.go:326 msg="Stopping notification manager..." component=notifier
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1644 msg="Notifier manager stopped"
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1621 msg="Web handler stopped"
+prometheus  | time=2026-10-09T12:54:40.419Z level=INFO source=main.go:1659 msg="See you next time!"
+grafana     | logger=plugin.installer t=2026-10-09T12:53:08.553002856Z level=info msg="Installing plugin" pluginId=grafana-metricsdrilldown-app version=
+prometheus  | time=2026-10-09T12:54:40.800Z level=INFO source=main.go:1770 msg="updated GOGC" old=100 new=75
+prometheus  | time=2026-10-09T12:54:40.800Z level=INFO source=main.go:824 msg="Leaving GOMAXPROCS=2: CPU quota undefined" component=automaxprocs
+grafana     | logger=installer.fs t=2026-10-09T12:53:08.603779536Z level=info msg="Downloaded and extracted grafana-metricsdrilldown-app v3.0.0 zip successfully to /var/lib/grafana/plugins/grafana-metricsdrilldown-app"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:08.620635014Z level=info msg="Plugin registered" pluginId=grafana-metricsdrilldown-app
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:08.620648179Z level=info msg="Plugin successfully installed" pluginId=grafana-metricsdrilldown-app version= duration=770.08161ms
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:08.952273089Z level=info msg="Installing plugin" pluginId=elasticsearch version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:09.258581413Z level=info msg="Updating plugin" pluginId=elasticsearch from=12.9.1 to=12.9.2
+grafana     | logger=plugin.elasticsearch t=2026-10-09T12:53:09.260473966Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/elasticsearch/gpx_grafana_elasticsearch_datasource_linux_amd64 id=17
+grafana     | logger=installer.fs t=2026-10-09T12:53:12.715682362Z level=info msg="Downloaded and extracted elasticsearch v12.9.2 zip successfully to /var/lib/grafana/plugins/elasticsearch"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:12.785677517Z level=info msg="Plugin registered" pluginId=elasticsearch
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:12.785760694Z level=info msg="Plugin successfully installed" pluginId=elasticsearch version= duration=3.833468189s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:13.047237079Z level=info msg="Installing plugin" pluginId=mysql version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:13.355991617Z level=info msg="Updating plugin" pluginId=mysql from=13.1.2 to=13.1.4
+grafana     | logger=plugin.mysql t=2026-10-09T12:53:13.357765167Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/mysql/gpx_grafana-mysql-datasource_linux_amd64 id=65
+grafana     | logger=installer.fs t=2026-10-09T12:53:16.977004402Z level=info msg="Downloaded and extracted mysql v13.1.4 zip successfully to /var/lib/grafana/plugins/mysql"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:17.020236727Z level=info msg="Plugin registered" pluginId=mysql
+prometheus  | time=2026-10-09T12:54:40.800Z level=INFO source=memlimit.go:198 msg="GOMEMLIMIT is updated" component=automemlimit package=github.com/KimMachineGun/automemlimit/memlimit GOMEMLIMIT=3447524966 previous=9223372036854775807
+prometheus  | time=2026-10-09T12:54:40.801Z level=INFO source=main.go:933 msg="Starting Prometheus Server" mode=server version="(version=3.15.0, branch=HEAD, revision=5241a27fe3c6983549fccc32f6e65917408c63cd)"
+prometheus  | time=2026-10-09T12:54:40.801Z level=INFO source=main.go:938 msg="operational information" build_context="(go=go1.27.1, platform=linux/amd64, user=root@4635dd007a60, date=20260925-07:33:45, tags=netgo,builtinassets)" host_details="(Linux 6.12.0-211.62.1.el10_2.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Oct  5 16:39:25 UTC 2026 x86_64 16bc95b2578a (none))" fd_limits="(soft=524287, hard=524288)" vm_limits="(soft=unlimited, hard=unlimited)"
+prometheus  | time=2026-10-09T12:54:40.969Z level=INFO source=web.go:727 msg="Start listening for connections" component=web address=0.0.0.0:9090
+prometheus  | time=2026-10-09T12:54:40.970Z level=INFO source=main.go:1499 msg="Starting TSDB ..."
+prometheus  | time=2026-10-09T12:54:40.971Z level=INFO source=tls_config.go:381 msg="Listening on" component=web address=[::]:9090
+prometheus  | time=2026-10-09T12:54:40.971Z level=INFO source=tls_config.go:384 msg="TLS is disabled." component=web http2=false address=[::]:9090
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:753 msg="Replaying on-disk memory mappable chunks if any" component=tsdb
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:838 msg="On-disk memory mappable chunks replay completed" component=tsdb duration=902ns
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:846 msg="Replaying WAL, this may take a while" component=tsdb
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:941 msg="WAL segment loaded" component=tsdb segment=0 maxSegment=1 duration=226.124µs
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:941 msg="WAL segment loaded" component=tsdb segment=1 maxSegment=1 duration=108.123µs
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:978 msg="WAL replay completed" component=tsdb checkpoint_replay_duration=21.21µs wal_replay_duration=371.287µs wbl_replay_duration=130ns chunk_snapshot_load_duration=0s mmap_chunk_replay_duration=902ns total_replay_duration=405.712µs
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1520 msg="filesystem information" fs_type=XFS_SUPER_MAGIC
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1523 msg="TSDB started"
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1721 msg="Loading configuration file" filename=/etc/prometheus/prometheus.yml
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1137 msg="TSDB retention updated" duration=15d size=0B percentage=0
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1763 msg="Completed loading of configuration file" db_storage=21.411µs remote_storage=2.144µs web_handler=191ns query_engine=1.192µs scrape=152.387µs scrape_sd=21.32µs notify=1.042µs notify_sd=531ns rules=1.132µs tracing=4.138µs filename=/etc/prometheus/prometheus.yml totalDuration=409.239µs
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1484 msg="Server is ready to receive web requests."
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=manager.go:235 msg="Starting rule manager..." component="rule manager"
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:17.020377772Z level=info msg="Plugin successfully installed" pluginId=mysql version= duration=3.973087713s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:17.02040374Z level=info msg="Installing plugin" pluginId=grafana-lokiexplore-app version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:19.105726298Z level=info msg="Installing plugin" pluginId=grafana-lokiexplore-app version=
+grafana     | logger=installer.fs t=2026-10-09T12:53:19.203772983Z level=info msg="Downloaded and extracted grafana-lokiexplore-app v3.0.0 zip successfully to /var/lib/grafana/plugins/grafana-lokiexplore-app"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:19.227252368Z level=info msg="Plugin registered" pluginId=grafana-lokiexplore-app
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:19.227268018Z level=info msg="Plugin successfully installed" pluginId=grafana-lokiexplore-app version= duration=2.206858617s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:19.602981901Z level=info msg="Installing plugin" pluginId=loki version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:19.908377991Z level=info msg="Updating plugin" pluginId=loki from=13.2.0 to=13.2.2
+grafana     | logger=plugin.loki t=2026-10-09T12:53:19.910548487Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/loki/gpx_grafana-loki-datasource_linux_amd64 id=51
+grafana     | logger=installer.fs t=2026-10-09T12:53:23.301266375Z level=info msg="Downloaded and extracted loki v13.2.2 zip successfully to /var/lib/grafana/plugins/loki"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:23.353587995Z level=info msg="Plugin registered" pluginId=loki
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:23.353966044Z level=info msg="Plugin successfully installed" pluginId=loki version= duration=3.75096628s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:23.696701937Z level=info msg="Installing plugin" pluginId=opentsdb version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:24.003683234Z level=info msg="Updating plugin" pluginId=opentsdb from=13.0.3 to=13.0.4
+grafana     | logger=plugin.opentsdb t=2026-10-09T12:53:24.005927207Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/opentsdb/gpx_grafana-opentsdb-datasource_linux_amd64 id=72
+grafana     | logger=installer.fs t=2026-10-09T12:53:28.015334004Z level=info msg="Downloaded and extracted opentsdb v13.0.4 zip successfully to /var/lib/grafana/plugins/opentsdb"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:28.043349536Z level=info msg="Plugin registered" pluginId=opentsdb
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:28.043461957Z level=info msg="Plugin successfully installed" pluginId=opentsdb version= duration=4.346724134s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:28.043541156Z level=info msg="Installing plugin" pluginId=grafana-advisor-app version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:30.662026353Z level=info msg="Installing plugin" pluginId=grafana-advisor-app version=
+grafana     | logger=installer.fs t=2026-10-09T12:53:30.672851319Z level=info msg="Downloaded and extracted grafana-advisor-app v1.1.0 zip successfully to /var/lib/grafana/plugins/grafana-advisor-app"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:30.684386759Z level=info msg="Plugin registered" pluginId=grafana-advisor-app
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:30.684398951Z level=info msg="Plugin successfully installed" pluginId=grafana-advisor-app version= duration=2.640788355s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:30.967637801Z level=info msg="Installing plugin" pluginId=influxdb version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:31.274868386Z level=info msg="Updating plugin" pluginId=influxdb from=13.1.5 to=13.1.7
+grafana     | logger=plugin.influxdb t=2026-10-09T12:53:31.276346852Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/influxdb/gpx_grafana_influxdb_datasource_linux_amd64 id=37
+grafana     | logger=installer.fs t=2026-10-09T12:53:34.610270489Z level=info msg="Downloaded and extracted influxdb v13.1.7 zip successfully to /var/lib/grafana/plugins/influxdb"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:34.659472473Z level=info msg="Plugin registered" pluginId=influxdb
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:34.65949203Z level=info msg="Plugin successfully installed" pluginId=influxdb version= duration=3.691751225s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:35.062488579Z level=info msg="Installing plugin" pluginId=grafana-postgresql-datasource version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:35.369694037Z level=info msg="Updating plugin" pluginId=grafana-postgresql-datasource from=13.0.3 to=13.0.4
+grafana     | logger=plugin.grafana-postgresql-datasource t=2026-10-09T12:53:35.371257212Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/grafana-postgresql-datasource/gpx_grafana_postgresql_datasource_linux_amd64 id=24
+grafana     | logger=installer.fs t=2026-10-09T12:53:37.842858067Z level=info msg="Downloaded and extracted grafana-postgresql-datasource v13.0.4 zip successfully to /var/lib/grafana/plugins/grafana-postgresql-datasource"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:37.888226954Z level=info msg="Plugin registered" pluginId=grafana-postgresql-datasource
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:37.888464028Z level=info msg="Plugin successfully installed" pluginId=grafana-postgresql-datasource version= duration=2.825950592s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:38.237718909Z level=info msg="Installing plugin" pluginId=zipkin version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:38.5442803Z level=info msg="Updating plugin" pluginId=zipkin from=12.4.8 to=12.4.9
+grafana     | logger=plugin.zipkin t=2026-10-09T12:53:38.546155841Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/zipkin/gpx_grafana-zipkin-datasource_linux_amd64 id=100
+grafana     | logger=installer.fs t=2026-10-09T12:53:39.240832016Z level=info msg="Downloaded and extracted zipkin v12.4.9 zip successfully to /var/lib/grafana/plugins/zipkin"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:39.269104812Z level=info msg="Plugin registered" pluginId=zipkin
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:39.269475769Z level=info msg="Plugin successfully installed" pluginId=zipkin version= duration=1.031731152s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:39.269575145Z level=info msg="Installing plugin" pluginId=grafana-exploretraces-app version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:42.344238259Z level=info msg="Installing plugin" pluginId=grafana-exploretraces-app version=
+grafana     | logger=installer.fs t=2026-10-09T12:53:42.404074569Z level=info msg="Downloaded and extracted grafana-exploretraces-app v2.2.1 zip successfully to /var/lib/grafana/plugins/grafana-exploretraces-app"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:42.423815145Z level=info msg="Plugin registered" pluginId=grafana-exploretraces-app
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:42.423831646Z level=info msg="Plugin successfully installed" pluginId=grafana-exploretraces-app version= duration=3.154213651s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:42.845456661Z level=info msg="Installing plugin" pluginId=prometheus version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:43.153128617Z level=info msg="Updating plugin" pluginId=prometheus from=13.2.1 to=13.2.3
+grafana     | logger=plugin.prometheus t=2026-10-09T12:53:43.155169007Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/prometheus/gpx_grafana-prometheus-datasource_linux_amd64 id=79
+grafana     | logger=installer.fs t=2026-10-09T12:53:46.800281454Z level=info msg="Downloaded and extracted prometheus v13.2.3 zip successfully to /var/lib/grafana/plugins/prometheus"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:46.863392403Z level=info msg="Plugin registered" pluginId=prometheus
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:46.863415165Z level=info msg="Plugin successfully installed" pluginId=prometheus version= duration=4.017931574s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:47.248393333Z level=info msg="Installing plugin" pluginId=grafana-pyroscope-datasource version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:47.557224624Z level=info msg="Updating plugin" pluginId=grafana-pyroscope-datasource from=13.0.6 to=13.0.7
+grafana     | logger=plugin.grafana-pyroscope-datasource t=2026-10-09T12:53:47.55884739Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/grafana-pyroscope-datasource/gpx_grafana-pyroscope-datasource_linux_amd64 id=31
+grafana     | logger=installer.fs t=2026-10-09T12:53:50.718106954Z level=info msg="Downloaded and extracted grafana-pyroscope-datasource v13.0.7 zip successfully to /var/lib/grafana/plugins/grafana-pyroscope-datasource"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:50.748961949Z level=info msg="Plugin registered" pluginId=grafana-pyroscope-datasource
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:50.74926585Z level=info msg="Plugin successfully installed" pluginId=grafana-pyroscope-datasource version= duration=3.500839435s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:51.345656621Z level=info msg="Installing plugin" pluginId=tempo version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:51.652024186Z level=info msg="Updating plugin" pluginId=tempo from=13.2.2 to=13.2.4
+grafana     | logger=plugin.tempo t=2026-10-09T12:53:51.654397392Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/tempo/gpx_grafana-tempo-datasource_linux_amd64 id=93
+grafana     | logger=installer.fs t=2026-10-09T12:53:55.500495016Z level=info msg="Downloaded and extracted tempo v13.2.4 zip successfully to /var/lib/grafana/plugins/tempo"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:55.54736515Z level=info msg="Plugin registered" pluginId=tempo
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:55.54738623Z level=info msg="Plugin successfully installed" pluginId=tempo version= duration=4.201708739s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:55.850389588Z level=info msg="Installing plugin" pluginId=mssql version=
+grafana     | logger=plugin.installer t=2026-10-09T12:53:56.15767646Z level=info msg="Updating plugin" pluginId=mssql from=13.0.5 to=13.0.7
+grafana     | logger=plugin.mssql t=2026-10-09T12:53:56.159662018Z level=info msg="plugin process exited" plugin=/usr/share/grafana/data/plugins-bundled/mssql/gpx_grafana-mssql-datasource_linux_amd64 id=58
+grafana     | logger=installer.fs t=2026-10-09T12:53:59.517116448Z level=info msg="Downloaded and extracted mssql v13.0.7 zip successfully to /var/lib/grafana/plugins/mssql"
+grafana     | logger=plugins.registration t=2026-10-09T12:53:59.564823745Z level=info msg="Plugin registered" pluginId=mssql
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:59.564845967Z level=info msg="Plugin successfully installed" pluginId=mssql version= duration=3.7144357s
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:53:59.564864211Z level=info msg="Installing plugin" pluginId=grafana-pyroscope-app version=
+grafana     | logger=plugin.installer t=2026-10-09T12:54:00.518136605Z level=info msg="Installing plugin" pluginId=grafana-pyroscope-app version=
+grafana     | logger=installer.fs t=2026-10-09T12:54:00.572964431Z level=info msg="Downloaded and extracted grafana-pyroscope-app v2.3.1 zip successfully to /var/lib/grafana/plugins/grafana-pyroscope-app"
+grafana     | logger=plugins.registration t=2026-10-09T12:54:00.591224446Z level=info msg="Plugin registered" pluginId=grafana-pyroscope-app
+grafana     | logger=plugin.backgroundinstaller t=2026-10-09T12:54:00.591239835Z level=info msg="Plugin successfully installed" pluginId=grafana-pyroscope-app version= duration=1.026371827s
+grafana     | logger=bleve-backend namespace=default group=provisioning.grafana.app resource=repositories reason=getStats t=2026-10-09T12:54:54.001123133Z level=info msg="Building index using memory"
+grafana     | logger=bleve-backend namespace=default group=provisioning.grafana.app resource=repositories reason=getStats t=2026-10-09T12:54:54.001671172Z level=info msg="Finished building index" elapsed=498.847µs listRV=1
+grafana     | logger=bleve-backend namespace=default group=provisioning.grafana.app resource=repositories reason=getStats t=2026-10-09T12:54:54.001687683Z level=info msg="Storing index in cache" key="{Namespace:default Group:provisioning.grafana.app Resource:repositories}" expiration=2026-10-09T13:04:54.001686661Z
+grafana     | logger=bleve-backend namespace=default group=playlist.grafana.app resource=playlists reason=getStats t=2026-10-09T12:54:54.002398097Z level=info msg="Building index using memory"
+grafana     | logger=bleve-backend namespace=default group=playlist.grafana.app resource=playlists reason=getStats t=2026-10-09T12:54:54.002827543Z level=info msg="Finished building index" elapsed=401.914µs listRV=1
+grafana     | logger=bleve-backend namespace=default group=playlist.grafana.app resource=playlists reason=getStats t=2026-10-09T12:54:54.002856978Z level=info msg="Storing index in cache" key="{Namespace:default Group:playlist.grafana.app Resource:playlists}" expiration=2026-10-09T13:04:54.002855586Z
+grafana     | logger=bleve-backend namespace=default group=folder.grafana.app resource=folders reason=getStats t=2026-10-09T12:54:54.003499455Z level=info msg="Building index using memory"
+grafana     | logger=bleve-backend namespace=default group=folder.grafana.app resource=folders reason=getStats t=2026-10-09T12:54:54.004012318Z level=info msg="Finished building index" elapsed=425.699µs listRV=1791550379700999
+grafana     | logger=bleve-backend namespace=default group=folder.grafana.app resource=folders reason=getStats t=2026-10-09T12:54:54.004025032Z level=info msg="Storing index in cache" key="{Namespace:default Group:folder.grafana.app Resource:folders}" expiration=2026-10-09T13:04:54.00402409Z
+grafana     | logger=infra.usagestats t=2026-10-09T12:54:54.005083189Z level=info msg="Usage stats are ready to report"
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ sudo docker compose logs --tail=20 loki prometheus
+prometheus  | time=2026-10-09T12:54:40.800Z level=INFO source=memlimit.go:198 msg="GOMEMLIMIT is updated" component=automemlimit package=github.com/KimMachineGun/automemlimit/memlimit GOMEMLIMIT=3447524966 previous=9223372036854775807
+loki        | level=info ts=2026-10-09T12:55:08.208790311Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki        | level=error ts=2026-10-09T12:55:08.210011213Z caller=log.go:223 msg="error running loki" err="mkdir /loki/chunks: permission denied\nerror creating object client\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).chunkClientForPeriod\n\t/src/loki/pkg/storage/store.go:241\ngithub.com/grafana/loki/v3/pkg/storage.(*LokiStore).init\n\t/src/loki/pkg/storage/store.go:201\ngithub.com/grafana/loki/v3/pkg/storage.NewStore\n\t/src/loki/pkg/storage/store.go:193\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).initStore\n\t/src/loki/pkg/loki/modules.go:902\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:136\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700\nerror initialising module: store\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+loki        | failed to create object client: mkdir /loki/chunks: permission denied
+loki        | error initialising module: compactor
+loki        | github.com/grafana/dskit/modules.(*Manager).initModule
+loki        | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138
+loki        | github.com/grafana/dskit/modules.(*Manager).InitModuleServices
+loki        | 	/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108
+loki        | github.com/grafana/loki/v3/pkg/loki.(*Loki).Run
+loki        | 	/src/loki/pkg/loki/loki.go:549
+loki        | main.main
+loki        | 	/src/loki/cmd/loki/main.go:130
+loki        | runtime.main
+loki        | 	/usr/local/go/src/runtime/proc.go:283
+loki        | runtime.goexit
+loki        | 	/usr/local/go/src/runtime/asm_amd64.s:1700
+loki        | level=info ts=2026-10-09T12:55:34.048518168Z caller=main.go:127 msg="Starting Loki" version="(version=3.6.0, branch=k277, revision=bc9cd763)"
+loki        | level=info ts=2026-10-09T12:55:34.048543937Z caller=main.go:128 msg="Loading configuration file" filename=/etc/loki/config.yml
+loki        | level=info ts=2026-10-09T12:55:34.049697914Z caller=server.go:386 msg="server listening on addresses" http=[::]:3100 grpc=[::]:9096
+loki        | level=error ts=2026-10-09T12:55:34.051425748Z caller=log.go:223 msg="error running loki" err="failed to create object client: mkdir /loki/chunks: permission denied\nerror initialising module: compactor\ngithub.com/grafana/dskit/modules.(*Manager).initModule\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:138\ngithub.com/grafana/dskit/modules.(*Manager).InitModuleServices\n\t/src/loki/vendor/github.com/grafana/dskit/modules/modules.go:108\ngithub.com/grafana/loki/v3/pkg/loki.(*Loki).Run\n\t/src/loki/pkg/loki/loki.go:549\nmain.main\n\t/src/loki/cmd/loki/main.go:130\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:283\nruntime.goexit\n\t/usr/local/go/src/runtime/asm_amd64.s:1700"
+prometheus  | time=2026-10-09T12:54:40.801Z level=INFO source=main.go:933 msg="Starting Prometheus Server" mode=server version="(version=3.15.0, branch=HEAD, revision=5241a27fe3c6983549fccc32f6e65917408c63cd)"
+prometheus  | time=2026-10-09T12:54:40.801Z level=INFO source=main.go:938 msg="operational information" build_context="(go=go1.27.1, platform=linux/amd64, user=root@4635dd007a60, date=20260925-07:33:45, tags=netgo,builtinassets)" host_details="(Linux 6.12.0-211.62.1.el10_2.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Oct  5 16:39:25 UTC 2026 x86_64 16bc95b2578a (none))" fd_limits="(soft=524287, hard=524288)" vm_limits="(soft=unlimited, hard=unlimited)"
+prometheus  | time=2026-10-09T12:54:40.969Z level=INFO source=web.go:727 msg="Start listening for connections" component=web address=0.0.0.0:9090
+prometheus  | time=2026-10-09T12:54:40.970Z level=INFO source=main.go:1499 msg="Starting TSDB ..."
+prometheus  | time=2026-10-09T12:54:40.971Z level=INFO source=tls_config.go:381 msg="Listening on" component=web address=[::]:9090
+prometheus  | time=2026-10-09T12:54:40.971Z level=INFO source=tls_config.go:384 msg="TLS is disabled." component=web http2=false address=[::]:9090
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:753 msg="Replaying on-disk memory mappable chunks if any" component=tsdb
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:838 msg="On-disk memory mappable chunks replay completed" component=tsdb duration=902ns
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:846 msg="Replaying WAL, this may take a while" component=tsdb
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:941 msg="WAL segment loaded" component=tsdb segment=0 maxSegment=1 duration=226.124µs
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:941 msg="WAL segment loaded" component=tsdb segment=1 maxSegment=1 duration=108.123µs
+prometheus  | time=2026-10-09T12:54:40.972Z level=INFO source=head.go:978 msg="WAL replay completed" component=tsdb checkpoint_replay_duration=21.21µs wal_replay_duration=371.287µs wbl_replay_duration=130ns chunk_snapshot_load_duration=0s mmap_chunk_replay_duration=902ns total_replay_duration=405.712µs
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1520 msg="filesystem information" fs_type=XFS_SUPER_MAGIC
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1523 msg="TSDB started"
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1721 msg="Loading configuration file" filename=/etc/prometheus/prometheus.yml
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1137 msg="TSDB retention updated" duration=15d size=0B percentage=0
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1763 msg="Completed loading of configuration file" db_storage=21.411µs remote_storage=2.144µs web_handler=191ns query_engine=1.192µs scrape=152.387µs scrape_sd=21.32µs notify=1.042µs notify_sd=531ns rules=1.132µs tracing=4.138µs filename=/etc/prometheus/prometheus.yml totalDuration=409.239µs
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=main.go:1484 msg="Server is ready to receive web requests."
+prometheus  | time=2026-10-09T12:54:40.973Z level=INFO source=manager.go:235 msg="Starting rule manager..." component="rule manager"
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS                          PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      3 minutes ago   Up 3 minutes                    192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         3 minutes ago   Restarting (1) 32 seconds ago   
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   3 minutes ago   Up About a minute               127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ vi /opt/observability/loki/config.yml
+[sysadmin@docker00 observability]$ cat /opt/observability/loki/config.yml
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  allow_structured_metadata: true
+  retention_period: 168h
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+
+analytics:
+  reporting_enabled: false
+
+[sysadmin@docker00 observability]$ sudo chown -R 10001:10001 ./loki-data
+chown: cannot access './loki-data': No such file or directory
+[sysadmin@docker00 observability]$ vi /prometheus/prometheus.yml^C
+[sysadmin@docker00 observability]$ ls
+compose.yaml  grafana  loki  prometheus
+[sysadmin@docker00 observability]$ cat compose.yaml
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+    ports:
+      - "192.168.122.92:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - observability
+
+  loki:
+    image: grafana/loki:3.6.0
+    container_name: loki
+    restart: unless-stopped
+    command:
+      - -config.file=/etc/loki/config.yml
+    ports:
+      - "192.168.122.92:3100:3100"
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    networks:
+      - observability
+
+networks:
+  observability:
+
+volumes:
+  grafana-data:
+  prometheus-data:
+  loki-data:
+
+[sysadmin@docker00 observability]$ sudo chown -R 10001:10001 /var/lib/docker/volumes/observability_loki-data/_data
+[sysadmin@docker00 observability]$ sudo docker compose up -d --force-recreate loki
+[+] up 1/1
+ ✔ Container loki Started                                                                                                                                                          0.4s
+[sysadmin@docker00 observability]$ sudo docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED         STATUS         PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      6 minutes ago   Up 6 minutes   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         7 seconds ago   Up 6 seconds   192.168.122.92:3100->3100/tcp
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   6 minutes ago   Up 4 minutes   127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ 
+[sysadmin@docker00 observability]$ curl -fsS http://127.0.0.1:9090/-/ready
+Prometheus Server is Ready.
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.92:3100/ready
+curl: (22) The requested URL returned error: 503
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.92:3000/api/health
+{
+  "database": "ok",
+  "version": "13.2.3",
+  "commit": "90ffed056f0884267356c12a0eeb72a022af53f1"
+}[sysadmin@docker00 observability]$sudo docker compose logs --tail=50 lokii
+loki  | level=error ts=2026-10-09T12:59:18.55334027Z caller=ratestore.go:110 msg="error getting ingester clients" err="empty ring"
+loki  | level=info ts=2026-10-09T12:59:18.553384423Z caller=module_service.go:82 msg=starting module=ingester-querier
+loki  | level=info ts=2026-10-09T12:59:18.553409449Z caller=ring.go:365 msg="ring doesn't exist in KV store yet"
+loki  | level=info ts=2026-10-09T12:59:18.553426812Z caller=module_service.go:82 msg=starting module=compactor
+loki  | level=info ts=2026-10-09T12:59:18.553510479Z caller=ring.go:365 msg="ring doesn't exist in KV store yet"
+loki  | level=info ts=2026-10-09T12:59:18.553475423Z caller=basic_lifecycler.go:321 msg="instance not found in the ring" instance=084ac8efb7f1 ring=scheduler
+loki  | level=info ts=2026-10-09T12:59:18.553538913Z caller=basic_lifecycler_delegates.go:63 msg="not loading tokens from file, tokens file path is empty"
+loki  | level=info ts=2026-10-09T12:59:18.553707971Z caller=ringmanager.go:186 msg="waiting until scheduler is JOINING in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.553732296Z caller=ringmanager.go:190 msg="scheduler is JOINING in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.55377176Z caller=ringmanager.go:199 msg="waiting until scheduler is ACTIVE in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.553811084Z caller=ring.go:365 component=distributor msg="ring doesn't exist in KV store yet"
+loki  | level=info ts=2026-10-09T12:59:18.553893239Z caller=module_service.go:82 msg=starting module=rule-evaluator
+loki  | level=info ts=2026-10-09T12:59:18.553910321Z caller=module_service.go:82 msg=starting module=ruler
+loki  | level=info ts=2026-10-09T12:59:18.55392629Z caller=ruler.go:536 msg="ruler up and running"
+loki  | level=info ts=2026-10-09T12:59:18.554002283Z caller=basic_lifecycler.go:321 msg="instance not found in the ring" instance=084ac8efb7f1 ring=compactor
+loki  | level=info ts=2026-10-09T12:59:18.55401135Z caller=basic_lifecycler_delegates.go:63 msg="not loading tokens from file, tokens file path is empty"
+loki  | level=info ts=2026-10-09T12:59:18.554030275Z caller=module_service.go:82 msg=starting module=ingester
+loki  | level=info ts=2026-10-09T12:59:18.554089927Z caller=ingester.go:565 component=ingester msg="recovering from checkpoint"
+loki  | level=info ts=2026-10-09T12:59:18.554111899Z caller=compactor.go:383 msg="waiting until compactor is JOINING in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.554115706Z caller=compactor.go:387 msg="compactor is JOINING in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.554115586Z caller=recovery.go:41 component=ingester msg="no checkpoint found, treating as no-op"
+loki  | level=info ts=2026-10-09T12:59:18.554150561Z caller=compactor.go:397 msg="waiting until compactor is ACTIVE in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.554188302Z caller=ingester.go:581 component=ingester msg="recovered WAL checkpoint recovery finished" elapsed=110.558µs errors=false
+loki  | level=info ts=2026-10-09T12:59:18.554201898Z caller=ingester.go:587 component=ingester msg="recovering from WAL"
+loki  | level=info ts=2026-10-09T12:59:18.554227476Z caller=basic_lifecycler.go:321 component=distributor msg="instance not found in the ring" instance=084ac8efb7f1 ring=distributor
+loki  | level=info ts=2026-10-09T12:59:18.554561172Z caller=ingester.go:603 component=ingester msg="WAL segment recovery finished" elapsed=484.64µs errors=false
+loki  | level=info ts=2026-10-09T12:59:18.554569347Z caller=ingester.go:551 component=ingester msg="closing recoverer"
+loki  | level=info ts=2026-10-09T12:59:18.555298988Z caller=ingester.go:559 component=ingester msg="WAL recovery finished" time=1.221885ms
+loki  | level=info ts=2026-10-09T12:59:18.555991729Z caller=wal.go:158 msg=started component=wal
+loki  | level=info ts=2026-10-09T12:59:18.556680942Z caller=lifecycler.go:687 component=ingester msg="not loading tokens from file, tokens file path is empty"
+loki  | level=info ts=2026-10-09T12:59:18.556709596Z caller=lifecycler.go:714 component=ingester msg="instance not found in ring, adding with no tokens" ring=ingester
+loki  | level=info ts=2026-10-09T12:59:18.556741456Z caller=lifecycler.go:556 component=ingester msg="auto-joining cluster after timeout" ring=ingester
+loki  | level=info ts=2026-10-09T12:59:18.556784557Z caller=ingester.go:772 component=ingester msg="sleeping for initial delay before starting periodic flushing" delay=5.405629071s
+loki  | level=info ts=2026-10-09T12:59:18.665762507Z caller=compactor.go:401 msg="compactor is ACTIVE in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.684950436Z caller=ringmanager.go:203 msg="scheduler is ACTIVE in the ring"
+loki  | level=info ts=2026-10-09T12:59:18.685007262Z caller=module_service.go:82 msg=starting module=query-scheduler
+loki  | level=info ts=2026-10-09T12:59:18.685057347Z caller=module_service.go:82 msg=starting module=querier
+loki  | level=info ts=2026-10-09T12:59:18.685076533Z caller=module_service.go:82 msg=starting module=query-frontend
+loki  | level=info ts=2026-10-09T12:59:18.685193933Z caller=loki.go:599 msg="Loki started" startup_time=233.488296ms
+loki  | level=info ts=2026-10-09T12:59:21.68544129Z caller=scheduler.go:652 msg="this scheduler is in the ReplicationSet, will now accept requests."
+loki  | level=info ts=2026-10-09T12:59:21.685594007Z caller=worker.go:235 component=querier msg="adding connection" addr=172.18.0.4:9096
+loki  | level=info ts=2026-10-09T12:59:23.666075841Z caller=compactor.go:460 msg="this instance has been chosen to run the compactor, starting compactor"
+loki  | level=info ts=2026-10-09T12:59:23.666133138Z caller=tables_manager.go:70 msg="waiting 10m0s for ring to stay stable and previous compactions to finish before starting compactor"
+loki  | level=info ts=2026-10-09T12:59:28.686137381Z caller=frontend_scheduler_worker.go:106 msg="adding connection to scheduler" addr=172.18.0.4:9096
+loki  | level=info ts=2026-10-09T12:59:48.556841566Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+loki  | level=info ts=2026-10-09T12:59:48.556880629Z caller=recalculate_owned_streams.go:63 msg="detected ring changes, re-evaluating streams ownership"
+loki  | level=info ts=2026-10-09T12:59:48.556885668Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+loki  | level=info ts=2026-10-09T13:00:18.522862208Z caller=table_manager.go:136 index-store=tsdb-2024-01-01 msg="uploading tables"
+loki  | level=info ts=2026-10-09T13:00:18.55705537Z caller=recalculate_owned_streams.go:49 msg="starting recalculate owned streams job"
+loki  | level=info ts=2026-10-09T13:00:18.557095586Z caller=recalculate_owned_streams.go:52 msg="completed recalculate owned streams job"
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.92:3100/ready
+ready
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.95:9100/metrics | head
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 0
+go_gc_duration_seconds{quantile="0.25"} 0
+go_gc_duration_seconds{quantile="0.5"} 0
+go_gc_duration_seconds{quantile="0.75"} 0
+go_gc_duration_seconds{quantile="1"} 0
+go_gc_duration_seconds_sum 0
+go_gc_duration_seconds_count 0
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+curl: (23) Failure writing output to destination, passed 2048 returned 239
+[sysadmin@docker00 observability]$ curl -s -o /dev/null \
+  -w "HTTP Status: %{http_code}\n" \
+  http://192.168.122.95:9100/metrics
+HTTP Status: 200
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.95:9100/metrics \
+  | grep -E '^(node_cpu_seconds_total|node_memory_MemAvailable_bytes|node_filesystem_size_bytes)' \
+  | head
+node_cpu_seconds_total{cpu="0",mode="idle"} 429.86
+node_cpu_seconds_total{cpu="0",mode="iowait"} 0.21
+node_cpu_seconds_total{cpu="0",mode="irq"} 0
+node_cpu_seconds_total{cpu="0",mode="nice"} 0.09
+node_cpu_seconds_total{cpu="0",mode="softirq"} 0.01
+node_cpu_seconds_total{cpu="0",mode="steal"} 0
+node_cpu_seconds_total{cpu="0",mode="system"} 2.05
+node_cpu_seconds_total{cpu="0",mode="user"} 0.94
+node_cpu_seconds_total{cpu="1",mode="idle"} 429.35
+node_cpu_seconds_total{cpu="1",mode="iowait"} 0.31
+[sysadmin@docker00 observability]$ ls
+compose.yaml  grafana  loki  prometheus
+[sysadmin@docker00 observability]$ vi /opt/observability/prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ curl -fsS http://192.168.122.95:9100/metrics | head
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 8.847e-06
+go_gc_duration_seconds{quantile="0.25"} 8.847e-06
+go_gc_duration_seconds{quantile="0.5"} 2.1684e-05
+go_gc_duration_seconds{quantile="0.75"} 4.842e-05
+go_gc_duration_seconds{quantile="1"} 4.842e-05
+go_gc_duration_seconds_sum 7.8951e-05
+go_gc_duration_seconds_count 3
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+curl: (23) Failure writing output to destination, passed 2048 returned 210
+[sysadmin@docker00 observability]$ vi /opt/observability/prometheus/prometheus.yml
+[sysadmin@docker00 observability]$ curl -X POST http://127.0.0.1:9090/-/reload
+Lifecycle API is not enabled.[sysadcurl -s http://127.0.0.1:9090/api/v1/targets | grep -E '"job"|"health"'ts | grep -E '"job"|"health"'
+{"status":"success","data":{"activeTargets":[{"discoveredLabels":{"__address__":"prometheus:9090","__always_scrape_classic_histograms__":"false","__convert_classic_histograms_to_nhcb__":"false","__metrics_path__":"/metrics","__scheme__":"http","__scrape_interval__":"15s","__scrape_native_histograms__":"false","__scrape_timeout__":"10s","job":"prometheus"},"labels":{"instance":"prometheus:9090","job":"prometheus"},"scrapePool":"prometheus","scrapeUrl":"http://prometheus:9090/metrics","globalUrl":"http://prometheus:9090/metrics","lastError":"","lastScrape":"2026-10-09T13:56:01.441299834Z","lastScrapeDuration":0.003503048,"health":"up","scrapeInterval":"15s","scrapeTimeout":"10s"},{"discoveredLabels":{"__address__":"192.168.122.XX:9100","__always_scrape_classic_histograms__":"false","__convert_classic_histograms_to_nhcb__":"false","__metrics_path__":"/metrics","__scheme__":"http","__scrape_interval__":"15s","__scrape_native_histograms__":"false","__scrape_timeout__":"10s","environment":"lab","job":"rocky-linux","os":"rocky-linux"},"labels":{"environment":"lab","instance":"192.168.122.XX:9100","job":"rocky-linux","os":"rocky-linux"},"scrapePool":"rocky-linux","scrapeUrl":"http://192.168.122.XX:9100/metrics","globalUrl":"http://192.168.122.XX:9100/metrics","lastError":"Get \"http://192.168.122.XX:9100/metrics\": dial tcp: lookup 192.168.122.XX on 127.0.0.11:53: no such host","lastScrape":"2026-10-09T13:56:02.449176133Z","lastScrapeDuration":0.001446435,"health":"down","scrapeInterval":"15s","scrapeTimeout":"10s"}],"droppedTargets":[],"droppedTargetCounts":{"prometheus":0,"rocky-linux":0}}}
+[sysadmin@docker00 observability]$ cat /opt/observability/prometheus/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+ 
+  - job_name: Linux01
+    static_configs:
+      - targets: ["192.168.122.95:9100"]
+[sysadmin@docker00 observability]$ docker compose exec prometheus \
+  promtool check config /etc/prometheus/prometheus.yml
+Checking /etc/prometheus/prometheus.yml
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+
+[sysadmin@docker00 observability]$ docker compose restart prometheus
+[+] restart 0/1
+ ⠹ Container prometheus Restarting                                                                                                                                                 0.3s
+[sysadmin@docker00 observability]$ docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED             STATUS             PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      About an hour ago   Up About an hour   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         About an hour ago   Up About an hour   192.168.122.92:3100->3100/tcp
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   About an hour ago   Up 2 minutes       127.0.0.1:9090->9090/tcp
+[sysadmin@docker00 observability]$ curl -I http://127.0.0.1:9090/-/ready
+HTTP/1.1 200 OK
+Date: Fri, 09 Oct 2026 14:05:00 GMT
+
+[sysadmin@docker00 observability]$ vi docker-compose.yml
+[sysadmin@docker00 observability]$ ls
+compose.yaml  grafana  loki  prometheus
+[sysadmin@docker00 observability]$ vi compose.yml
+[sysadmin@docker00 observability]$ vi compose.yaml
+[sysadmin@docker00 observability]$ docker compose up -d --force-recreate prometheus
+[+] up 1/1
+ ✔ Container prometheus Started                                                                                                                                                    0.4s
+[sysadmin@docker00 observability]$ docker compose ps
+NAME         IMAGE                    COMMAND                  SERVICE      CREATED             STATUS             PORTS
+grafana      grafana/grafana:latest   "/run.sh"                grafana      About an hour ago   Up About an hour   192.168.122.92:3000->3000/tcp
+loki         grafana/loki:3.6.0       "/usr/bin/loki -conf…"   loki         About an hour ago   Up About an hour   192.168.122.92:3100->3100/tcp
+prometheus   prom/prometheus:latest   "/bin/prometheus --c…"   prometheus   9 seconds ago       Up 8 seconds       192.168.122.92:9090->9090/tcp
+[sysadmin@docker00 observability]$ 
