@@ -149,7 +149,7 @@ Complete!
 printf 'GRAFANA_ADMIN_PASSWORD=%s\n' \
   "$(openssl rand -hex 24)" > .env
 cat .env
-GRAFANA_ADMIN_PASSWORD=dadc9dfd7a3ed45a2d7ab2cb67e3dd53652e378e9d2407bc
+GRAFANA_ADMIN_PASSWORD=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 [sysadmin@docker00 observability]$ nano ^Cpt/observability/prometheus/prometheus.yml
 [sysadmin@docker00 observability]$ pwd
 /opt/observability
