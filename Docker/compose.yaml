@@ -1,18 +1,4 @@
 services:
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
-    ports:
-      - "192.168.122.92:3000:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-    networks:
-      - observability
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -20,33 +6,23 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=15d
     ports:
-      - "192.168.122.92:9090:9090"
+      - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
-    networks:
-      - observability
+      - prometheus_data:/prometheus
 
-  loki:
-    image: grafana/loki:3.6.0
-    container_name: loki
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
     restart: unless-stopped
-    command:
-      - -config.file=/etc/loki/config.yml
     ports:
-      - "192.168.122.92:3100:3100"
+      - "3000:3000"
     volumes:
-      - ./loki/config.yml:/etc/loki/config.yml:ro
-      - loki-data:/loki
-    networks:
-      - observability
-
-networks:
-  observability:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
 
 volumes:
-  grafana-data:
-  prometheus-data:
-  loki-data:
+  prometheus_data:
+  grafana_data:
