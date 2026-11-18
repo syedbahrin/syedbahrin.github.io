@@ -1,0 +1,66 @@
+Lab architecture
+Observability server
+Fedora 45 – F45
+172.16.165.141
+Podman host
+
+LAN / IPVLAN networking
+
+LGTM Pod
+Dedicated LAN IP
+
+172.16.165.143
+Grafana
+
+Port 3000
+
+
+Loki
+
+Port 3100
+
+
+Tempo
+
+Port 3200
+
+
+Mimir
+
+Port 9009
+
+
+
+All four services share the Pod's network namespace and LAN address.
+
+
+Monitored server
+Rocky Linux 10.3 – RK1001
+172.16.165.142
+Grafana Alloy
+
+Metrics · Logs · Application traces
+
+
+Components
+Component	Purpose
+Grafana	Dashboards and visualization
+Loki	Log aggregation
+Grafana Tempo	Distributed tracing
+Grafana Mimir	Metrics storage
+Grafana Alloy	Telemetry collection on RK1001
+
+Data flow:
+- Metrics: RK1001 → Alloy → Mimir
+- Logs: RK1001 → Alloy → Loki
+- Traces: RK1001 → Alloy → Tempo
+- Visualization: Grafana → Mimir, Loki and Tempo
+We'll implement in this order:
+1. Fedora 45 preparation.
+2. Podman installation.
+3. Dedicated LAN networking for the Pod.
+4. LGTM deployment.
+5. Rocky Linux 10.3 installation and preparation.
+6. Alloy installation and configuration.
+7. Grafana datasource configuration.
+8. Testing and troubleshooting.
